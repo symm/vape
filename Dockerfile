@@ -13,7 +13,7 @@ RUN go build
 RUN go install
 
 # Final Image
-FROM golang:alpine
+FROM alpine
 COPY --from=0 /go/bin/vape  .
 
 CMD ["./vape"]
