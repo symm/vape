@@ -2,57 +2,90 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
-	"strconv"
 
-	"github.com/olekukonko/tablewriter"
+	"github.com/fatih/color"
 )
 
-// Check is a check to perform on the server
+// StatusCodeCheck is a check to perform on the server
 type StatusCodeCheck struct {
-	URL        string
-	StatusCode int
+	URL                string
+	ExpectedStatusCode int
 }
 
+// CheckResult is the result of a StatusCodeCheck
 type CheckResult struct {
-	Check      StatusCodeCheck
-	StatusCode int
-	Pass       bool
+	Check            StatusCodeCheck
+	ActualStatusCode int
+	Pass             bool
+}
+
+func getStatusCodeChecks() []StatusCodeCheck {
+	// TODO: read these in from a config file
+	return []StatusCodeCheck{
+		StatusCodeCheck{URL: "http://localhost:8000/", ExpectedStatusCode: 200},
+		StatusCodeCheck{URL: "http://localhost:8000/missing", ExpectedStatusCode: 404},
+		//	StatusCodeCheck{URL: "http://localhost:8000/chicken", ExpectedStatusCode: 200},
+		//StatusCodeCheck{URL: "http://localhost:4444/chicken", ExpectedStatusCode: 200},
+	}
 }
 
 func main() {
-	urls := []StatusCodeCheck{
-		StatusCodeCheck{URL: "http://mysite.com/health", StatusCode: 200},
-		StatusCodeCheck{URL: "http://mysite.com/fake-page-chicken", StatusCode: 404},
+	statusCodeChecks := getStatusCodeChecks()
+
+	resc, errc := make(chan CheckResult), make(chan error)
+
+	for _, check := range statusCodeChecks {
+		go func(check StatusCodeCheck) {
+			result, err := performCheck(check)
+
+			if err != nil {
+				errc <- err
+				return
+			}
+
+			resc <- result
+		}(check)
 	}
 
-	fmt.Println("Smoke tester")
-	fmt.Println("------------")
+	pass := color.New(color.FgGreen).PrintfFunc()
+	fail := color.New(color.FgRed).PrintfFunc()
 
-	results := []CheckResult{}
-	// TODO: goroutines send this all at once
-	for _, check := range urls {
-		results = append(results, performCheck(check))
+	failed := false
+	for i := 0; i < len(statusCodeChecks); i++ {
+		select {
+		case res := <-resc:
+			message := fmt.Sprintf("%s (expected: %d, actual: %d)\n", res.Check.URL, res.Check.ExpectedStatusCode, res.ActualStatusCode)
+
+			if res.Pass == true {
+				pass(message)
+			} else {
+				failed = true
+				fail(message)
+			}
+
+		case err := <-errc:
+			fail(fmt.Sprintf("%s\n", err))
+			failed = true
+		}
 	}
 
-	fmt.Println("All pages checked, here are the results:")
-
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"URL", "Expected Status Code", "Actual Status Code", "PASS?"})
-	for _, result := range results {
-		table.Append([]string{
-			result.Check.URL,
-			strconv.Itoa(result.Check.StatusCode),
-			strconv.Itoa(result.StatusCode),
-			strconv.FormatBool(result.Pass)})
+	if failed {
+		os.Exit(1)
 	}
 
-	table.Render()
+	os.Exit(0)
 }
 
-func performCheck(check StatusCodeCheck) CheckResult {
-	fmt.Printf("[+] Checking %s\n", check.URL)
-	wasSuccessful := check.StatusCode == 500
+func performCheck(check StatusCodeCheck) (CheckResult, error) {
+	resp, err := http.Get(check.URL)
 
-	return CheckResult{StatusCode: 500, Check: check, Pass: wasSuccessful}
+	if err != nil {
+		return CheckResult{}, err
+	}
+
+	wasSuccessful := check.ExpectedStatusCode == resp.StatusCode
+
+	return CheckResult{ActualStatusCode: resp.StatusCode, Check: check, Pass: wasSuccessful}, nil
 }
