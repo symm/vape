@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -21,18 +25,34 @@ type CheckResult struct {
 	Pass             bool
 }
 
-func getStatusCodeChecks() []StatusCodeCheck {
-	// TODO: read these in from a config file
-	return []StatusCodeCheck{
-		StatusCodeCheck{URL: "http://localhost:8000/", ExpectedStatusCode: 200},
-		StatusCodeCheck{URL: "http://localhost:8000/missing", ExpectedStatusCode: 404},
-		//	StatusCodeCheck{URL: "http://localhost:8000/chicken", ExpectedStatusCode: 200},
-		//StatusCodeCheck{URL: "http://localhost:4444/chicken", ExpectedStatusCode: 200},
+func getStatusCodeChecks(vapeFile string) []StatusCodeCheck {
+	file, err := os.Open(vapeFile)
+	if err != nil {
+		log.Fatal(err)
 	}
+	defer file.Close()
+
+	checks := []StatusCodeCheck{}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		words := strings.Fields(scanner.Text())
+		url := words[0]
+		code, err := strconv.Atoi(words[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		checks = append(checks, StatusCodeCheck{URL: url, ExpectedStatusCode: code})
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return checks
 }
 
 func main() {
-	statusCodeChecks := getStatusCodeChecks()
+	statusCodeChecks := getStatusCodeChecks(".smoke")
 
 	resc, errc := make(chan CheckResult), make(chan error)
 
