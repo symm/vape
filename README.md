@@ -21,9 +21,13 @@ then execute the `vape` binary to run the checks
 Create the smoke file as above but be sure to mount it inside the container:
 
 ```
-    docker run \
-        --rm \
-        -t \
-        -v $(PWD)/smoke.example:/.smoke \
-        symm/vape:latest
+docker run \
+    --rm \
+    -t \
+    -v $(PWD)/smoke.example:/.smoke \
+    symm/vape:latest
 ```
+
+## TODO
+
+This project is HackDay™ quality. In need of test coverage and refactoring
