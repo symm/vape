@@ -17,4 +17,4 @@ FROM alpine
 RUN apk add --no-cache ca-certificates
 COPY --from=0 /go/bin/vape  .
 
-CMD ["./vape"]
+ENTRYPOINT ["./vape"]

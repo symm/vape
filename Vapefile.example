@@ -1,0 +1,10 @@
+[
+  {
+    "uri": "/status/200",
+    "expectedStatusCode": 200
+  },
+  {
+    "uri": "/status/500",
+    "expectedStatusCode": 500
+  }
+]

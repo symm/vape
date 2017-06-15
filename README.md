@@ -6,15 +6,21 @@ Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written
 
 ## As a binary
 
-Create a `.smoke` file in the format:
+Create a `Vapefile` file in the format:
 ```
-https://httpbin.org/status/418 418
-https://httpbin.org/status/200 200
-https://httpbin.org/status/500 500
-https://httpbin.org/status/404 404
+[
+  {
+    "uri": "/status/200",
+    "expectedStatusCode": 200
+  },
+  {
+    "uri": "/status/500",
+    "expectedStatusCode": 500
+  }
+]
 ```
 
-then execute the `vape` binary to run the checks
+then execute `vape http://your.domain/` to run the checks
 
 ## As a container
 

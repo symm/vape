@@ -4,5 +4,6 @@ run:
 	docker run \
 		--rm \
 		-t \
-		-v $(PWD)/smoke.example:/.smoke \
-		symm/vape:latest
+		-v $(PWD)/Vapefile.example:/Vapefile \
+		symm/vape:latest \
+		https://httpbin.org

@@ -1,21 +1,19 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/fatih/color"
 )
 
 // StatusCodeCheck is a check to perform on the server
 type StatusCodeCheck struct {
-	URL                string
-	ExpectedStatusCode int
+	URI                string `json:"uri"`
+	ExpectedStatusCode int    `json:"expectedStatusCode"`
 }
 
 // CheckResult is the result of a StatusCodeCheck
@@ -26,39 +24,42 @@ type CheckResult struct {
 }
 
 func getStatusCodeChecks(vapeFile string) []StatusCodeCheck {
-	file, err := os.Open(vapeFile)
+	raw, err := ioutil.ReadFile(vapeFile)
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	checks := []StatusCodeCheck{}
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		words := strings.Fields(scanner.Text())
-		url := words[0]
-		code, err := strconv.Atoi(words[1])
-		if err != nil {
-			log.Fatal(err)
-		}
-		checks = append(checks, StatusCodeCheck{URL: url, ExpectedStatusCode: code})
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
+	var checks []StatusCodeCheck
+	//TODO: make sure we've got a valid URI and ExpectedStatusCode
+	json.Unmarshal(raw, &checks)
 
 	return checks
 }
 
+func usage() {
+	fmt.Printf("Usage: ./vape {BaseURL}\n\n")
+	fmt.Println("Where {BaseURL} e.g. https://example.com")
+	os.Exit(0)
+}
+
 func main() {
-	statusCodeChecks := getStatusCodeChecks(".smoke")
+
+	if len(os.Args) != 2 {
+		usage()
+	}
+
+	// TODO: verify it's a proper good baseURL
+	baseURL := os.Args[1]
+
+	statusCodeChecks := getStatusCodeChecks("Vapefile")
 
 	resc, errc := make(chan CheckResult), make(chan error)
 
+	// TODO: limit the numer of concurrent requests so we don't DoS the server
 	for _, check := range statusCodeChecks {
 		go func(check StatusCodeCheck) {
-			result, err := performCheck(check)
+			result, err := performCheck(baseURL, check)
 
 			if err != nil {
 				errc <- err
@@ -76,7 +77,7 @@ func main() {
 	for i := 0; i < len(statusCodeChecks); i++ {
 		select {
 		case res := <-resc:
-			message := fmt.Sprintf("%s (expected: %d, actual: %d)\n", res.Check.URL, res.Check.ExpectedStatusCode, res.ActualStatusCode)
+			message := fmt.Sprintf("%s (expected: %d, actual: %d)\n", res.Check.URI, res.Check.ExpectedStatusCode, res.ActualStatusCode)
 
 			if res.Pass == true {
 				pass(message)
@@ -98,8 +99,8 @@ func main() {
 	os.Exit(0)
 }
 
-func performCheck(check StatusCodeCheck) (CheckResult, error) {
-	resp, err := http.Get(check.URL)
+func performCheck(baseURL string, check StatusCodeCheck) (CheckResult, error) {
+	resp, err := http.Get(baseURL + check.URI)
 
 	if err != nil {
 		return CheckResult{}, err
