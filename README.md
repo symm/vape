@@ -26,12 +26,13 @@ then execute `vape http://your.domain` to run the checks
 
 Create the `Vapefile` file as above but be sure to mount it inside the container:
 
-```bash
+```shell
 docker run \
     --rm \
     -t \
     -v $(PWD)/Vapefile.example:/Vapefile \
-    symm/vape:latest
+    symm/vape:latest \
+    https://your.domain
 ```
 
 ## TODO
