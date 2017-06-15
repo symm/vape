@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/fatih/color"
@@ -49,8 +51,12 @@ func main() {
 		usage()
 	}
 
-	// TODO: verify it's a proper good baseURL
 	baseURL := os.Args[1]
+
+	_, err := url.ParseRequestURI(baseURL)
+	if err != nil {
+		log.Fatal("The supplied BaseURL is invalid")
+	}
 
 	statusCodeChecks := getStatusCodeChecks("Vapefile")
 
