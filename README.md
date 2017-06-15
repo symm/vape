@@ -7,30 +7,30 @@ Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written
 ## As a binary
 
 Create a `Vapefile` file in the format:
-```
+```json
 [
   {
-    "uri": "/status/200",
+    "uri": "/health",
     "expectedStatusCode": 200
   },
   {
-    "uri": "/status/500",
-    "expectedStatusCode": 500
+    "uri": "/page-that-should-not-exist",
+    "expectedStatusCode": 404
   }
 ]
 ```
 
-then execute `vape http://your.domain/` to run the checks
+then execute `vape http://your.domain` to run the checks
 
 ## As a container
 
-Create the smoke file as above but be sure to mount it inside the container:
+Create the `Vapefile` file as above but be sure to mount it inside the container:
 
-```
+```bash
 docker run \
     --rm \
     -t \
-    -v $(PWD)/smoke.example:/.smoke \
+    -v $(PWD)/Vapefile.example:/Vapefile \
     symm/vape:latest
 ```
 
