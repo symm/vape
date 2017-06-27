@@ -1,10 +1,10 @@
 [
   {
     "uri": "/status/200",
-    "expectedStatusCode": 200
+    "expected_status_code": 200
   },
   {
     "uri": "/status/500",
-    "expectedStatusCode": 500
+    "expected_status_code": 500
   }
 ]

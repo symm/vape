@@ -1,4 +1,4 @@
-# Vape
+# Vape [![Build Status](https://travis-ci.org/symm/vape.svg?branch=master)](https://travis-ci.org/symm/vape)
 
 Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written in Go. Inspired by [Shisha](https://github.com/namshi/shisha)
 
@@ -11,11 +11,11 @@ Create a `Vapefile` file in the format:
 [
   {
     "uri": "/health",
-    "expectedStatusCode": 200
+    "expected_status_code": 200
   },
   {
     "uri": "/page-that-should-not-exist",
-    "expectedStatusCode": 404
+    "expected_status_code": 404
   }
 ]
 ```
