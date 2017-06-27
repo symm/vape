@@ -18,7 +18,10 @@ run-docker:
 		https://httpbin.org
 
 test:
-	go test ./... -cover -race
+	go test ./... -cover -coverprofile=coverage.out -race
+
+coverage: test
+	go tool cover -html=coverage.out
 
 push:
 	docker login -u="$(DOCKER_USERNAME)" -p="$(DOCKER_PASSWORD)";
