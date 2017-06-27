@@ -55,7 +55,8 @@ func (v Vape) Run(statusCodeChecks StatusCodeChecks) {
 	for i := 0; i < len(statusCodeChecks); i++ {
 		select {
 		case res := <-resCh:
-			fmt.Printf("%s (expected: %d, actual: %d)\n", res.Check.URI, res.Check.ExpectedStatusCode, res.ActualStatusCode)
+			output := fmt.Sprintf("%s (expected: %d, actual: %d)", res.Check.URI, res.Check.ExpectedStatusCode, res.ActualStatusCode)
+			fmt.Println(parseOutput(output, res.Pass))
 		case err := <-errCh:
 			fmt.Println(err)
 		}

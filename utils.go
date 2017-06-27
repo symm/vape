@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/url"
 )
@@ -35,4 +36,13 @@ func parseBaseURL(baseURL string) (*url.URL, error) {
 		return nil, errors.New("invalid protocol scheme")
 	}
 	return u, nil
+}
+
+// parseOutput colours a given message.
+func parseOutput(message string, pass bool) string {
+	colour := 32
+	if !pass {
+		colour = 31
+	}
+	return fmt.Sprintf("\033[%dm%s\033[0m", colour, message)
 }

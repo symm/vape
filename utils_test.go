@@ -84,3 +84,23 @@ func TestParseBaseURL(t *testing.T) {
 		}
 	})
 }
+
+func TestParseOutput(t *testing.T) {
+	message := "test"
+
+	t.Run("TestGreen", func(t *testing.T) {
+		output := parseOutput(message, true)
+		expected := "\033[32mtest\033[0m"
+		if output != expected {
+			t.Errorf("expected output: %s, got: %s", expected, output)
+		}
+	})
+
+	t.Run("TestRed", func(t *testing.T) {
+		output := parseOutput(message, false)
+		expected := "\033[31mtest\033[0m"
+		if output != expected {
+			t.Errorf("expected output: %s, got: %s", expected, output)
+		}
+	})
+}
