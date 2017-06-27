@@ -1,15 +1,9 @@
 NAME = vape
 
 build:
-	go build -o $(NAME)
-
-build-docker:
 	docker build -t symm/vape:latest .
 
-config:
-	cp Vapefile.example Vapefile
-
-run-docker:
+run:
 	docker run \
 		--rm \
 		-t \
@@ -18,4 +12,10 @@ run-docker:
 		https://httpbin.org
 
 test:
-	go test ./... -cover -race
+	docker run \
+		--rm \
+		-t \
+		-v $(PWD)/:/usr/src/myapp \
+		-w /usr/src/myapp \
+		golang:alpine \
+		go test ./... -cover
