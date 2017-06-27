@@ -19,3 +19,7 @@ run-docker:
 
 test:
 	go test ./... -cover -race
+
+push:
+	docker login -u="$(DOCKER_USERNAME)" -p="$(DOCKER_PASSWORD)";
+	docker push symm/vape:latest
