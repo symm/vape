@@ -7,22 +7,21 @@ services:
 - docker
 
 before_install:
-- curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-- sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu
-  $(lsb_release -cs) stable"
-- sudo apt-get update
-- sudo apt-get -y install docker-ce
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu
+      $(lsb_release -cs) stable"
+    - sudo apt-get update
+    - sudo apt-get -y install docker-ce
 
 script:
-- make test
-- make build-docker
-- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-  docker push $DOCKER_USERNAME/vape:latest
+    - make test
+    - make build-docker
+
+after_success:
+    - if [ "$TRAVIS_BRANCH" == "docker-push" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push symm/vape:latest;
+    fi
 
 notifications:
   email: false
-
-env:
-  global:
-  - secure: fiA7X36DwGqNcMA39vEOxhOBvDNGSK/Qbuyaab8X3VwElAX2+exXOqyMTjAo0v+eGcnzFqslmMse2rYLTUz3ZT7NRIVi4PDtiK/gboJ1+0wU0ZkgPciykso+PrOwmPzxcMB4fh1YXO6FScCiPS+H9DTzRBBCcQQfh4oNUPxbgkhg3P7y+MQzhdrQgWqto/0qSHrDeVDkmAMVbbZZAbZlBTF29BudW06WoLSgn4tL+hbgQ9k3ZDYiNa1YjBkSKQd+BH/P5KIWHLdcv3EH576SATDJGGjUBYei6Nr0WQRmXQYQOKmGF0ZrAzc+p3zdApvO2DObz5DkmBefVarz265V8sB4BAeK10zIq1CftPW+14hpGzT9wR2mC7EiUiXPzWJ/E6Z129KvBq7dPaDtQgmhO719H+izQ/ex9xxgEOgXanSRtIPnKbeaiZKiza7U1uYOo7pVQDZrVFi0eaWvYxQ4tLJdqby1aTpL1RuK4m6S9BS5ki8X4FtECwvTQNrkg6w/VIKjjCuwnXtvlt35nCWFJdesm+VHtKPBHWz2xHeee+15cswMtGRb/JieR5El4X7KjWspeZWU1icfLkhxwPyJViN11JaKjaTPscffkvSeCs4lrN3eiqAUWquRhhXcuthPYifGBIDNB3ibi0C74/nG70NncizX0Iq1o4G7vHssLhU=
-  - secure: pHRzZ0oui6UVmKp4g7x2g9FafGqW7AL75yvvlulCyaf+HTjErNV5uouNjWoYylDj7yb2Iw9DlDoXMkgLY3wWff6z6K4zKl72v9dQUmy3hhz5IbzWdIVhJnunE0Op1Z7g3N5iFKAOncjrzUxCeS2nhMB/rpDhuyzYS1OiIyyZDwHC4b6GfSj+Cfkrd9HK/aYtXJSdp54mGE2t9gLRwej94IX03V4caSjhAm59KS/5NQHmv+Fo1qTHndBFExnbdiu67dP8XT0skjOKhsXSJPWS1KepVTruRWEICwCh+S0lPcKyXp8C4qLajtBkSWUdxU8R6Q9mByfS8BXiHx7V8UKsW1u6t6+wG+cltc158ZBSLupJbuNuuoOBjY0WwyuNG1bVfFiALmA0QOs74AaxslUOLCTuNKELHu9HJPeBzurzIoCJQ/AQLzdPo/RKCvvN4OYLkkllTEmZb0Og+ToIUuWqEwCG3aZvKiKmViD9UDGynSJFVSFan/+J8wzazHjPR2kgZv2ebp8cdini6RZQsrV4Fm9OMq/jOpVwmD8BgqEylmPjFWHd2LzlUITyMgrPSsZ8IgJruD7IZu5n/2C4DDistewJSVv/qc3YiPCJ09H8z14BNQzdJYIUdkLCkl85CYyCLX8QWhpCTpe7Yf7c1y6jjUstwnDCjTuLJTeB7R7/3BQ=
