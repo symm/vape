@@ -18,10 +18,7 @@ script:
     - make build-docker
 
 after_success:
-    - if [ "$TRAVIS_BRANCH" == "docker-push" ]; then
-    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push symm/vape;
-    fi
+    - if [ "$TRAVIS_BRANCH" == "docker-push" ]; then make push; fi
 
 notifications:
   email: false
