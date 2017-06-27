@@ -6,13 +6,29 @@ import (
 	"path"
 )
 
-// Vape ...
+// StatusCodeCheck contains a URI and expected status code.
+type StatusCodeCheck struct {
+	URI                string `json:"uri"`
+	ExpectedStatusCode int    `json:"expected_status_code"`
+}
+
+// CheckResult is the result of a StatusCodeCheck.
+type CheckResult struct {
+	Check            StatusCodeCheck
+	ActualStatusCode int
+	Pass             bool
+}
+
+// StatusCodeChecks is a slice of checks to perform.
+type StatusCodeChecks []StatusCodeCheck
+
+// Vape contains dependencies used to run the application.
 type Vape struct {
 	client  HTTPClient
 	baseURL *url.URL
 }
 
-// NewVape ...
+// NewVape builds a Vape from the given dependencies.
 func NewVape(client HTTPClient, baseURL *url.URL) Vape {
 	return Vape{
 		client:  client,
@@ -20,7 +36,7 @@ func NewVape(client HTTPClient, baseURL *url.URL) Vape {
 	}
 }
 
-// Run ...
+// Run takes a list of URIs and concurrently performs a smoke test on each.
 func (v Vape) Run(statusCodeChecks StatusCodeChecks) {
 	resCh, errCh := make(chan CheckResult), make(chan error)
 
@@ -46,6 +62,7 @@ func (v Vape) Run(statusCodeChecks StatusCodeChecks) {
 	}
 }
 
+// performCheck checks the status code of a HTTP request to a given URI.
 func (v Vape) performCheck(check StatusCodeCheck) (CheckResult, error) {
 	url := *v.baseURL
 	url.Path = path.Join(url.Path, check.URI)

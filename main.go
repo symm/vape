@@ -3,26 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
 )
-
-// StatusCodeCheck is a check to perform on the server
-type StatusCodeCheck struct {
-	URI                string `json:"uri"`
-	ExpectedStatusCode int    `json:"expected_status_code"`
-}
-
-// CheckResult is the result of a StatusCodeCheck
-type CheckResult struct {
-	Check            StatusCodeCheck
-	ActualStatusCode int
-	Pass             bool
-}
-
-// StatusCodeChecks ...
-type StatusCodeChecks []StatusCodeCheck
 
 func main() {
 	if len(os.Args) != 2 {
@@ -30,17 +12,18 @@ func main() {
 		os.Exit(0)
 	}
 
-	baseURL, err := url.Parse(os.Args[1])
+	baseURL, err := parseBaseURL(os.Args[1])
 	if err != nil {
-		fmt.Println("vape: invalid base URL")
+		fmt.Printf("vape: invalid base URL: %v\n", err)
 		os.Exit(0)
 	}
 
-	statusCodeChecks, err := readVapefile(vapefile)
+	statusCodeChecks, err := parseVapefile(vapefile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	vape := NewVape(http.DefaultClient, baseURL)
+	client := NewHTTPClient()
+	vape := NewVape(client, baseURL)
 	vape.Run(statusCodeChecks)
 }

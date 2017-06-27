@@ -31,7 +31,7 @@ func TestReadVapefileInvalidJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cleanup()
-	_, err = readVapefile(tmpfile.Name())
+	_, err = parseVapefile(tmpfile.Name())
 	if err == nil {
 		t.Error("expected error reading JSON, got: nil")
 	}
@@ -53,8 +53,34 @@ func TestReadVapefilieSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cleanup()
-	_, err = readVapefile(tmpfile.Name())
+	_, err = parseVapefile(tmpfile.Name())
 	if err != nil {
 		t.Errorf("expected error: nil, got: %v", err)
 	}
+}
+
+func TestParseBaseURL(t *testing.T) {
+	t.Run("TestInvalidURL", func(t *testing.T) {
+		url := ":"
+		_, err := parseBaseURL(url)
+		if err == nil {
+			t.Error("expected error parsing invalid URL, got: nil")
+		}
+	})
+
+	t.Run("TestInvalidURLScheme", func(t *testing.T) {
+		url := "test.com"
+		_, err := parseBaseURL(url)
+		if err == nil {
+			t.Error("expected error parsing invalid URL scheme, got: nil")
+		}
+	})
+
+	t.Run("TestValidURL", func(t *testing.T) {
+		url := "http://test.com"
+		_, err := parseBaseURL(url)
+		if err != nil {
+			t.Errorf("expected error: nil, got: %v", err)
+		}
+	})
 }
