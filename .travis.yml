@@ -1,6 +1,14 @@
 language: go
+
 go:
-- 1.8.x
-script: make test
+    - 1.8.x
+
+services:
+    - docker
+
+script: 
+    - make test
+    - make build-docker
+
 notifications:
   email: false
