@@ -1,4 +1,8 @@
-# Vape [![Build Status](https://travis-ci.org/symm/vape.svg?branch=master)](https://travis-ci.org/symm/vape) [![Coverage Status](https://coveralls.io/repos/github/symm/vape/badge.svg?branch=master)](https://coveralls.io/github/symm/vape?branch=master)
+# Vape
+[![Build Status](https://img.shields.io/travis/symm/vape.svg)](https://travis-ci.org/symm/vape)
+[![Coverage Status](https://img.shields.io/coveralls/symm/vape.svg)](https://coveralls.io/github/symm/vape?branch=master)
+[![Docker Pulls](https://img.shields.io/docker/pulls/symm/vape.svg)](https://hub.docker.com/r/symm/vape/)
+[![license](https://img.shields.io/github/license/symm/vape.svg)]()
 
 Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written in Go. Inspired by [Shisha](https://github.com/namshi/shisha)
 
