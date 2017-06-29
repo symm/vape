@@ -65,7 +65,7 @@ func (v Vape) Run(statusCodeChecks StatusCodeChecks) {
 	}
 }
 
-// performCheck checks the status code of a HTTP request to a given URI.
+// performCheck checks the status code of a HTTP request of a given URI.
 func (v Vape) performCheck(check StatusCodeCheck) (CheckResult, error) {
 	url := *v.baseURL
 	url.Path = path.Join(url.Path, check.URI)
