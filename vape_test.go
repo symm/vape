@@ -15,23 +15,60 @@ func (m mockHTTPClient) Get(url string) (*http.Response, error) {
 	return m.GetFunc(url)
 }
 
-func TestPerformCheck(t *testing.T) {
-	var httpClient = new(mockHTTPClient)
+var httpClient = new(mockHTTPClient)
+
+var check = StatusCodeCheck{
+	URI:                "test",
+	ExpectedStatusCode: 200,
+}
+
+func TestProcess(t *testing.T) {
+	resCh, errCh := make(chan CheckResult, 1), make(chan error, 1)
 	baseURL, err := url.Parse("http://base.url")
 	if err != nil {
 		t.Fatal(err)
 	}
-	check := StatusCodeCheck{
-		URI:                "test",
-		ExpectedStatusCode: 200,
+	vape := NewVape(httpClient, baseURL, resCh, errCh)
+
+	t.Run("TestHTTPErrorResult", func(t *testing.T) {
+		httpClient.GetFunc = func(url string) (*http.Response, error) {
+			return nil, errors.New("HTTP error")
+		}
+		vape.Process(StatusCodeChecks{check})
+		select {
+		case <-resCh:
+			t.Error("expected to recieve on error chan, not result chan")
+		case <-errCh:
+		}
+	})
+
+	t.Run("TestHTTPErrorResult", func(t *testing.T) {
+		httpClient.GetFunc = func(url string) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 200,
+			}, nil
+		}
+		vape.Process(StatusCodeChecks{check})
+		select {
+		case <-resCh:
+		case <-errCh:
+			t.Error("expected to recieve on result chan, not error chan")
+		}
+	})
+}
+
+func TestPerformCheck(t *testing.T) {
+	baseURL, err := url.Parse("http://base.url")
+	if err != nil {
+		t.Fatal(err)
 	}
+	vape := NewVape(httpClient, baseURL, nil, nil)
 
 	t.Run("TestHTTPGetError", func(t *testing.T) {
 		httpClient.GetFunc = func(url string) (*http.Response, error) {
 			return nil, errors.New("HTTP error")
 		}
 
-		vape := NewVape(httpClient, baseURL, nil, nil)
 		_, err := vape.performCheck(check)
 		if err == nil {
 			t.Error("expected error: 'HTTP error', got: nil")
@@ -45,7 +82,6 @@ func TestPerformCheck(t *testing.T) {
 			}, nil
 		}
 
-		vape := NewVape(httpClient, baseURL, nil, nil)
 		result, err := vape.performCheck(check)
 		if err != nil {
 			t.Errorf("expected error: nil, got: %v", err)

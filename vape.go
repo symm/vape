@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/url"
 	"path"
 )
@@ -40,8 +39,8 @@ func NewVape(client HTTPClient, baseURL *url.URL, resCh chan CheckResult, errCh 
 	}
 }
 
-// Run takes a list of URIs and concurrently performs a smoke test on each.
-func (v Vape) Run(statusCodeChecks StatusCodeChecks) {
+// Process takes a list of URIs and concurrently performs a smoke test on each.
+func (v Vape) Process(statusCodeChecks StatusCodeChecks) {
 	// TODO: limit the numer of concurrent requests so we don't DoS the server
 	for _, check := range statusCodeChecks {
 		go func(check StatusCodeCheck) {
@@ -52,16 +51,6 @@ func (v Vape) Run(statusCodeChecks StatusCodeChecks) {
 			}
 			v.resCh <- result
 		}(check)
-	}
-
-	for i := 0; i < len(statusCodeChecks); i++ {
-		select {
-		case res := <-v.resCh:
-			output := fmt.Sprintf("%s (expected: %d, actual: %d)", res.Check.URI, res.Check.ExpectedStatusCode, res.ActualStatusCode)
-			fmt.Println(parseOutput(output, res.Pass))
-		case err := <-v.errCh:
-			fmt.Println(err)
-		}
 	}
 }
 

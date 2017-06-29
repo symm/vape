@@ -23,7 +23,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	resCh, errCh := make(chan CheckResult), make(chan error)
+	checksLen := len(statusCodeChecks)
+	resCh, errCh := make(chan CheckResult, checksLen), make(chan error, checksLen)
 	vape := NewVape(DefaultClient, baseURL, resCh, errCh)
-	vape.Run(statusCodeChecks)
+	vape.Process(statusCodeChecks)
+
+	for i := 0; i < checksLen; i++ {
+		select {
+		case res := <-resCh:
+			output := fmt.Sprintf("%s (expected: %d, actual: %d)", res.Check.URI, res.Check.ExpectedStatusCode, res.ActualStatusCode)
+			fmt.Println(parseOutput(output, res.Pass))
+		case err := <-errCh:
+			fmt.Println(err)
+		}
+	}
 }
