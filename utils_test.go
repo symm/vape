@@ -25,6 +25,15 @@ func tmpFile(data string) (*os.File, func(), error) {
 	return tmpfile, cleanup, nil
 }
 
+func TestReadVapeFileFileDoesNotExist(t *testing.T) {
+	_, err := parseVapefile("dummy.file")
+
+	if err == nil {
+		t.Error("expected error accessing JSON file, got: nil")
+	}
+
+}
+
 func TestReadVapefileInvalidJSON(t *testing.T) {
 	tmpfile, cleanup, err := tmpFile("invalid JSON")
 	if err != nil {
@@ -37,7 +46,7 @@ func TestReadVapefileInvalidJSON(t *testing.T) {
 	}
 }
 
-func TestReadVapefilieSuccess(t *testing.T) {
+func TestReadVapefileSuccess(t *testing.T) {
 	json := `[
   {
     "uri": "/status/200",
