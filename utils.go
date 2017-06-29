@@ -8,9 +8,6 @@ import (
 	"net/url"
 )
 
-// vapefile is the name of the configuration file.
-const vapefile = "Vapefile"
-
 // parseVapefile reads a given Vapefile and returns the contents.
 func parseVapefile(file string) (StatusCodeChecks, error) {
 	raw, err := ioutil.ReadFile(file)

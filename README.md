@@ -35,6 +35,10 @@ docker run \
     https://your.domain
 ```
 
+### Optional Arguments
+
+`-config full/path/to/Vapefile` specify an alternative to looking for `Vapefile` in the current directory
+
 ## TODO
 
 This project is HackDay™ quality. In need of test coverage and refactoring
