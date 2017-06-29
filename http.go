@@ -10,10 +10,7 @@ type HTTPClient interface {
 	Get(url string) (*http.Response, error)
 }
 
-// NewHTTPClient returns a HTTP client with configured timeouts.
-func NewHTTPClient() HTTPClient {
-	client := &http.Client{
-		Timeout: time.Duration(5 * time.Second),
-	}
-	return client
+// DefaultClient returns a HTTP client with configured timeouts.
+var DefaultClient = &http.Client{
+	Timeout: time.Duration(5 * time.Second),
 }

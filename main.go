@@ -23,7 +23,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	client := NewHTTPClient()
-	vape := NewVape(client, baseURL)
+	resCh, errCh := make(chan CheckResult), make(chan error)
+	vape := NewVape(DefaultClient, baseURL, resCh, errCh)
 	vape.Run(statusCodeChecks)
 }
