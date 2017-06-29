@@ -1,90 +1,57 @@
 package main
 
 import (
+	"errors"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"testing"
 )
 
-var (
-	mux    *http.ServeMux
-	client Vape
-	server *httptest.Server
-)
+type mockHTTPClient struct {
+	GetFunc func(url string) (*http.Response, error)
+}
 
-func setup() {
-	// test server
-	mux = http.NewServeMux()
-	server = httptest.NewServer(mux)
+func (m mockHTTPClient) Get(url string) (*http.Response, error) {
+	return m.GetFunc(url)
+}
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
+func TestPerformCheck(t *testing.T) {
+	var httpClient = new(mockHTTPClient)
+	baseURL, err := url.Parse("http://base.url")
+	if err != nil {
+		t.Fatal(err)
+	}
+	check := StatusCodeCheck{
+		URI:                "test",
+		ExpectedStatusCode: 200,
+	}
+
+	t.Run("TestHTTPGetError", func(t *testing.T) {
+		httpClient.GetFunc = func(url string) (*http.Response, error) {
+			return nil, errors.New("HTTP error")
+		}
+
+		vape := NewVape(httpClient, baseURL, nil, nil)
+		_, err := vape.performCheck(check)
+		if err == nil {
+			t.Error("expected error: 'HTTP error', got: nil")
+		}
 	})
 
-	// client
-	httpClient := NewHTTPClient()
-	url, _ := url.Parse(server.URL)
-	client = NewVape(httpClient, url)
-}
+	t.Run("TestHTTPGetSuccess", func(t *testing.T) {
+		httpClient.GetFunc = func(url string) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 200,
+			}, nil
+		}
 
-// teardown closes the test HTTP server.
-func teardown() {
-	server.Close()
-}
-
-func TestMatchingStatusCodePasses(t *testing.T) {
-	setup()
-	defer teardown()
-
-	check := StatusCodeCheck{
-		ExpectedStatusCode: 200,
-		URI:                "/health",
-	}
-
-	result, err := client.performCheck(check)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if result.Pass != true {
-		t.Errorf("expected Pass: true, got: %v", result.Pass)
-	}
-
-	if result.ActualStatusCode != 200 {
-		t.Errorf("expected ActualStatusCode: 200, got: %v", result.ActualStatusCode)
-	}
-
-	if result.Check != check {
-		t.Errorf("expected check to match original, got: %v", result.Check)
-	}
-}
-
-func TestDifferentStatusCodeFails(t *testing.T) {
-	setup()
-	defer teardown()
-
-	check := StatusCodeCheck{
-		ExpectedStatusCode: 404,
-		URI:                "/health",
-	}
-
-	result, err := client.performCheck(check)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if result.Pass != false {
-		t.Errorf("expected Pass: false, got: %v", result.Pass)
-	}
-
-	if result.ActualStatusCode != 200 {
-		t.Errorf("expected ActualStatusCode: 200, got: %v", result.ActualStatusCode)
-	}
-
-	if result.Check != check {
-		t.Errorf("expected check to match original, got: %v", result.Check)
-	}
+		vape := NewVape(httpClient, baseURL, nil, nil)
+		result, err := vape.performCheck(check)
+		if err != nil {
+			t.Errorf("expected error: nil, got: %v", err)
+		}
+		if result.ActualStatusCode != 200 {
+			t.Errorf("expected status code: 200, got: %d", result.ActualStatusCode)
+		}
+	})
 }

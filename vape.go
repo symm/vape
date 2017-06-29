@@ -26,44 +26,46 @@ type StatusCodeChecks []StatusCodeCheck
 type Vape struct {
 	client  HTTPClient
 	baseURL *url.URL
+	resCh   chan CheckResult
+	errCh   chan error
 }
 
 // NewVape builds a Vape from the given dependencies.
-func NewVape(client HTTPClient, baseURL *url.URL) Vape {
+func NewVape(client HTTPClient, baseURL *url.URL, resCh chan CheckResult, errCh chan error) Vape {
 	return Vape{
 		client:  client,
 		baseURL: baseURL,
+		resCh:   resCh,
+		errCh:   errCh,
 	}
 }
 
 // Run takes a list of URIs and concurrently performs a smoke test on each.
 func (v Vape) Run(statusCodeChecks StatusCodeChecks) {
-	resCh, errCh := make(chan CheckResult), make(chan error)
-
 	// TODO: limit the numer of concurrent requests so we don't DoS the server
 	for _, check := range statusCodeChecks {
 		go func(check StatusCodeCheck) {
 			result, err := v.performCheck(check)
 			if err != nil {
-				errCh <- err
+				v.errCh <- err
 				return
 			}
-			resCh <- result
+			v.resCh <- result
 		}(check)
 	}
 
 	for i := 0; i < len(statusCodeChecks); i++ {
 		select {
-		case res := <-resCh:
+		case res := <-v.resCh:
 			output := fmt.Sprintf("%s (expected: %d, actual: %d)", res.Check.URI, res.Check.ExpectedStatusCode, res.ActualStatusCode)
 			fmt.Println(parseOutput(output, res.Pass))
-		case err := <-errCh:
+		case err := <-v.errCh:
 			fmt.Println(err)
 		}
 	}
 }
 
-// performCheck checks the status code of a HTTP request to a given URI.
+// performCheck checks the status code of a HTTP request of a given URI.
 func (v Vape) performCheck(check StatusCodeCheck) (CheckResult, error) {
 	url := *v.baseURL
 	url.Path = path.Join(url.Path, check.URI)
