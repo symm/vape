@@ -42,16 +42,18 @@ func NewVape(client HTTPClient, baseURL *url.URL, resCh chan CheckResult, errCh 
 // Process takes a list of URIs and concurrently performs a smoke test on each.
 func (v Vape) Process(statusCodeChecks StatusCodeChecks) {
 	// TODO: limit the numer of concurrent requests so we don't DoS the server
-	for _, check := range statusCodeChecks {
-		go func(check StatusCodeCheck) {
-			result, err := v.performCheck(check)
-			if err != nil {
-				v.errCh <- err
-				return
-			}
-			v.resCh <- result
-		}(check)
-	}
+	go func() {
+		for _, check := range statusCodeChecks {
+			go func(check StatusCodeCheck) {
+				result, err := v.performCheck(check)
+				if err != nil {
+					v.errCh <- err
+					return
+				}
+				v.resCh <- result
+			}(check)
+		}
+	}()
 }
 
 // performCheck checks the status code of a HTTP request of a given URI.
