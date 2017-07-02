@@ -94,20 +94,34 @@ func TestParseBaseURL(t *testing.T) {
 	})
 }
 
-func TestParseOutput(t *testing.T) {
-	message := "test"
+func TestFormatResult(t *testing.T) {
+	result := SmokeTestResult{
+		Test: SmokeTest{
+			URI:                "/health",
+			ExpectedStatusCode: 200,
+		},
+		ActualStatusCode: 200,
+	}
 
-	t.Run("TestGreen", func(t *testing.T) {
-		output := parseOutput(message, true)
-		expected := "\033[32mtest\033[0m"
+	t.Run("TestSuccess", func(t *testing.T) {
+		output := formatResult(result)
+		expected := "\033[32m✓ [200:200] /health\033[0m"
 		if output != expected {
 			t.Errorf("expected output: %s, got: %s", expected, output)
 		}
 	})
 
-	t.Run("TestRed", func(t *testing.T) {
-		output := parseOutput(message, false)
-		expected := "\033[31mtest\033[0m"
+	result = SmokeTestResult{
+		Test: SmokeTest{
+			URI:                "/health",
+			ExpectedStatusCode: 200,
+		},
+		ActualStatusCode: 500,
+	}
+
+	t.Run("TestFail", func(t *testing.T) {
+		output := formatResult(result)
+		expected := "\033[31m✘ [200:500] /health\033[0m"
 		if output != expected {
 			t.Errorf("expected output: %s, got: %s", expected, output)
 		}
