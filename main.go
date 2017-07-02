@@ -36,8 +36,8 @@ func main() {
 	for i := 0; i < testsLen; i++ {
 		select {
 		case res := <-resCh:
-			output := fmt.Sprintf("%s (expected: %d, actual: %d)", res.Test.URI, res.Test.ExpectedStatusCode, res.ActualStatusCode)
-			fmt.Println(parseOutput(output, res.Pass))
+
+			fmt.Println(formatResult(res))
 		case err := <-errCh:
 			fmt.Println(err)
 		}

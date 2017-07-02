@@ -35,11 +35,17 @@ func parseBaseURL(baseURL string) (*url.URL, error) {
 	return u, nil
 }
 
-// parseOutput colours a given message.
-func parseOutput(message string, pass bool) string {
+// formatResult returns a readable string summarizing the result
+func formatResult(result SmokeTestResult) string {
+	message := fmt.Sprintf("[%d:%d] %s", result.Test.ExpectedStatusCode, result.ActualStatusCode, result.Test.URI)
+
 	colour := 32
-	if !pass {
+	icon := '✓'
+
+	if !result.Pass {
+		icon = '✘'
 		colour = 31
 	}
-	return fmt.Sprintf("\033[%dm%s\033[0m", colour, message)
+
+	return fmt.Sprintf("\033[%dm%c %s\033[0m", colour, icon, message)
 }
