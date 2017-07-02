@@ -11,7 +11,7 @@ func tmpFile(data string) (*os.File, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	if _, err := tmpfile.Write([]byte(data)); err != nil {
+	if _, err = tmpfile.Write([]byte(data)); err != nil {
 		return nil, nil, err
 	}
 	if err = tmpfile.Close(); err != nil {

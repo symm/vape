@@ -23,20 +23,20 @@ func main() {
 		os.Exit(0)
 	}
 
-	statusCodeChecks, err := parseVapefile(*vapeFile)
+	smokeTests, err := parseVapefile(*vapeFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	checksLen := len(statusCodeChecks)
-	resCh, errCh := make(chan CheckResult, checksLen), make(chan error, checksLen)
+	testsLen := len(smokeTests)
+	resCh, errCh := make(chan SmokeTestResult, testsLen), make(chan error, testsLen)
 	vape := NewVape(DefaultClient, baseURL, resCh, errCh)
-	vape.Process(statusCodeChecks)
+	vape.Process(smokeTests)
 
-	for i := 0; i < checksLen; i++ {
+	for i := 0; i < testsLen; i++ {
 		select {
 		case res := <-resCh:
-			output := fmt.Sprintf("%s (expected: %d, actual: %d)", res.Check.URI, res.Check.ExpectedStatusCode, res.ActualStatusCode)
+			output := fmt.Sprintf("%s (expected: %d, actual: %d)", res.Test.URI, res.Test.ExpectedStatusCode, res.ActualStatusCode)
 			fmt.Println(parseOutput(output, res.Pass))
 		case err := <-errCh:
 			fmt.Println(err)

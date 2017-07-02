@@ -9,21 +9,21 @@ import (
 )
 
 // parseVapefile reads a given Vapefile and returns the contents.
-func parseVapefile(file string) (StatusCodeChecks, error) {
+func parseVapefile(file string) (SmokeTests, error) {
 	raw, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
 
-	var checks StatusCodeChecks
-	err = json.Unmarshal(raw, &checks)
+	var tests SmokeTests
+	err = json.Unmarshal(raw, &tests)
 	if err != nil {
 		return nil, err
 	}
-	return checks, nil
+	return tests, nil
 }
 
-// parseBaseURL checks a given URL is valid.
+// parseBaseURL tests a given URL is valid.
 func parseBaseURL(baseURL string) (*url.URL, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {

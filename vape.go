@@ -5,32 +5,32 @@ import (
 	"path"
 )
 
-// StatusCodeCheck contains a URI and expected status code.
-type StatusCodeCheck struct {
+// SmokeTest contains a URI and expected status code.
+type SmokeTest struct {
 	URI                string `json:"uri"`
 	ExpectedStatusCode int    `json:"expected_status_code"`
 }
 
-// CheckResult is the result of a StatusCodeCheck.
-type CheckResult struct {
-	Check            StatusCodeCheck
+// SmokeTestResult is the result of a SmokeTest.
+type SmokeTestResult struct {
+	Test             SmokeTest
 	ActualStatusCode int
 	Pass             bool
 }
 
-// StatusCodeChecks is a slice of checks to perform.
-type StatusCodeChecks []StatusCodeCheck
+// SmokeTests is a slice of smoke tests to perform.
+type SmokeTests []SmokeTest
 
 // Vape contains dependencies used to run the application.
 type Vape struct {
 	client  HTTPClient
 	baseURL *url.URL
-	resCh   chan CheckResult
+	resCh   chan SmokeTestResult
 	errCh   chan error
 }
 
 // NewVape builds a Vape from the given dependencies.
-func NewVape(client HTTPClient, baseURL *url.URL, resCh chan CheckResult, errCh chan error) Vape {
+func NewVape(client HTTPClient, baseURL *url.URL, resCh chan SmokeTestResult, errCh chan error) Vape {
 	return Vape{
 		client:  client,
 		baseURL: baseURL,
@@ -40,35 +40,35 @@ func NewVape(client HTTPClient, baseURL *url.URL, resCh chan CheckResult, errCh 
 }
 
 // Process takes a list of URIs and concurrently performs a smoke test on each.
-func (v Vape) Process(statusCodeChecks StatusCodeChecks) {
+func (v Vape) Process(SmokeTests SmokeTests) {
 	// TODO: limit the numer of concurrent requests so we don't DoS the server
 	go func() {
-		for _, check := range statusCodeChecks {
-			go func(check StatusCodeCheck) {
-				result, err := v.performCheck(check)
+		for _, test := range SmokeTests {
+			go func(test SmokeTest) {
+				result, err := v.performTest(test)
 				if err != nil {
 					v.errCh <- err
 					return
 				}
 				v.resCh <- result
-			}(check)
+			}(test)
 		}
 	}()
 }
 
-// performCheck checks the status code of a HTTP request of a given URI.
-func (v Vape) performCheck(check StatusCodeCheck) (CheckResult, error) {
+// performTest tests the status code of a HTTP request of a given URI.
+func (v Vape) performTest(test SmokeTest) (SmokeTestResult, error) {
 	url := *v.baseURL
-	url.Path = path.Join(url.Path, check.URI)
+	url.Path = path.Join(url.Path, test.URI)
 
 	resp, err := v.client.Get(url.String())
 	if err != nil {
-		return CheckResult{}, err
+		return SmokeTestResult{}, err
 	}
 
-	return CheckResult{
+	return SmokeTestResult{
 		ActualStatusCode: resp.StatusCode,
-		Check:            check,
-		Pass:             check.ExpectedStatusCode == resp.StatusCode,
+		Test:             test,
+		Pass:             test.ExpectedStatusCode == resp.StatusCode,
 	}, nil
 }
