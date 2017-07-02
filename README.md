@@ -14,12 +14,21 @@ Create a `Vapefile` file in the format:
 ```json
 [
   {
-    "uri": "/health",
+    "uri": "/status/418",
+    "expected_status_code": 418,
+    "content": "teapot"
+  },
+  {
+    "uri": "/status/200",
     "expected_status_code": 200
   },
   {
-    "uri": "/page-that-should-not-exist",
-    "expected_status_code": 404
+    "uri": "/status/304",
+    "expected_status_code": 304
+  },
+  {
+    "uri": "/status/500",
+    "expected_status_code": 500
   }
 ]
 ```
