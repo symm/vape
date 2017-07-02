@@ -23,11 +23,15 @@ type SmokeTestResult struct {
 
 // Passed determines if the SmokeTest passed successfully
 func (result SmokeTestResult) Passed() bool {
-	if result.Test.Content != "" {
-		return !result.contentMatched()
+	if !result.statusCodeMatched() {
+		return false
 	}
 
-	return result.statusCodeMatched()
+	if result.Test.Content != "" && !result.contentMatched() {
+		return false
+	}
+
+	return true
 }
 
 func (result SmokeTestResult) statusCodeMatched() bool {
@@ -35,7 +39,7 @@ func (result SmokeTestResult) statusCodeMatched() bool {
 }
 
 func (result SmokeTestResult) contentMatched() bool {
-	return (strings.Contains(string(result.ActualContent), result.Test.Content) == false)
+	return (strings.Contains(string(result.ActualContent), result.Test.Content) == true)
 }
 
 // SmokeTests is a slice of smoke tests to perform.

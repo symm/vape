@@ -24,6 +24,79 @@ var test = SmokeTest{
 	ExpectedStatusCode: 200,
 }
 
+func TestSmokeTestResult(t *testing.T) {
+	t.Run("PassedWhenStatusCodeMatches", func(t *testing.T) {
+		result := SmokeTestResult{
+			Test: SmokeTest{
+				ExpectedStatusCode: 200,
+			},
+			ActualStatusCode: 200,
+		}
+
+		if result.Passed() != true {
+			t.Errorf("expected pass: true, got: %v", result.Passed())
+		}
+	})
+
+	t.Run("FailedWhenStatusCodeDifferent", func(t *testing.T) {
+		result := SmokeTestResult{
+			Test: SmokeTest{
+				ExpectedStatusCode: 200,
+			},
+			ActualStatusCode: 404,
+		}
+
+		if result.Passed() != false {
+			t.Errorf("expected pass: false, got: %v", result.Passed())
+		}
+	})
+
+	t.Run("PassedWhenStatusCodeAndContentMatches", func(t *testing.T) {
+		result := SmokeTestResult{
+			Test: SmokeTest{
+				ExpectedStatusCode: 200,
+				Content:            "Hello",
+			},
+			ActualStatusCode: 200,
+			ActualContent:    []byte("Hello"),
+		}
+
+		if result.Passed() != true {
+			t.Errorf("expected pass: true, got: %v", result.Passed())
+		}
+	})
+
+	t.Run("FailedWhenStatusCodeMatchesButContentDoesnt", func(t *testing.T) {
+		result := SmokeTestResult{
+			Test: SmokeTest{
+				ExpectedStatusCode: 200,
+				Content:            "Hello",
+			},
+			ActualStatusCode: 200,
+			ActualContent:    []byte("Goodbye"),
+		}
+
+		if result.Passed() != false {
+			t.Errorf("expected pass: false, got: %v", result.Passed())
+		}
+	})
+
+	t.Run("FailedWhenStatusCodeDifferentButContentMatches", func(t *testing.T) {
+		result := SmokeTestResult{
+			Test: SmokeTest{
+				ExpectedStatusCode: 200,
+				Content:            "Hello",
+			},
+			ActualStatusCode: 404,
+			ActualContent:    []byte("Hello"),
+		}
+
+		if result.Passed() != false {
+			t.Errorf("expected pass: false, got: %v", result.Passed())
+		}
+	})
+}
+
 func TestProcess(t *testing.T) {
 	resCh, errCh := make(chan SmokeTestResult, 1), make(chan error, 1)
 	baseURL, err := url.Parse("http://base.url")
