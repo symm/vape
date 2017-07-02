@@ -24,3 +24,7 @@ after_success:
 
 notifications:
   email: false
+
+branches:
+  only:
+  - master
