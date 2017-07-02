@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -50,11 +51,11 @@ func TestReadVapefileSuccess(t *testing.T) {
 	json := `[
   {
     "uri": "/status/200",
-    "expectedStatusCode": 200
+    "expected_status_code": 200
   },
   {
     "uri": "/status/500",
-    "expectedStatusCode": 500
+    "expected_status_code": 500
   }
 ]`
 	tmpfile, cleanup, err := tmpFile(json)
@@ -66,6 +67,54 @@ func TestReadVapefileSuccess(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected error: nil, got: %v", err)
 	}
+}
+
+func TestReadVapefileMissingFields(t *testing.T) {
+	t.Run("TestUriMissing", func(t *testing.T) {
+		json := `[
+	  {
+	    "expected_status_code": 200
+	  }
+	]`
+		tmpfile, cleanup, err := tmpFile(json)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer cleanup()
+		_, err = parseVapefile(tmpfile.Name())
+		if err == nil {
+			t.Errorf("expected error: got: %v", err)
+		}
+
+		expectedError := "Each test should have at least a uri and expected_status_code"
+		if strings.Contains(err.Error(), expectedError) == false {
+			t.Errorf("expected message: %s got %s", expectedError, err.Error())
+		}
+	})
+
+	t.Run("TestExpectedStatusCodeMissing", func(t *testing.T) {
+		t.Run("TestUriMissing", func(t *testing.T) {
+			json := `[
+			{
+				"uri": "/health"
+			}
+		]`
+			tmpfile, cleanup, err := tmpFile(json)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer cleanup()
+			_, err = parseVapefile(tmpfile.Name())
+			if err == nil {
+				t.Errorf("expected error: got: %v", err)
+			}
+
+			expectedError := "Each test should have at least a uri and expected_status_code"
+			if strings.Contains(err.Error(), expectedError) == false {
+				t.Errorf("expected message: %s got %s", expectedError, err.Error())
+			}
+		})
+	})
 }
 
 func TestParseBaseURL(t *testing.T) {
