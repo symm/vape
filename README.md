@@ -24,7 +24,7 @@ Create a `Vapefile` file in the format:
 ]
 ```
 
-then execute `vape http://your.domain` to run the checks
+then execute `vape http://your.domain` to run the tests
 
 ## As a container
 

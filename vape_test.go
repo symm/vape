@@ -17,13 +17,13 @@ func (m mockHTTPClient) Get(url string) (*http.Response, error) {
 
 var httpClient = new(mockHTTPClient)
 
-var check = StatusCodeCheck{
+var test = SmokeTest{
 	URI:                "test",
 	ExpectedStatusCode: 200,
 }
 
 func TestProcess(t *testing.T) {
-	resCh, errCh := make(chan CheckResult, 1), make(chan error, 1)
+	resCh, errCh := make(chan SmokeTestResult, 1), make(chan error, 1)
 	baseURL, err := url.Parse("http://base.url")
 	if err != nil {
 		t.Fatal(err)
@@ -34,7 +34,7 @@ func TestProcess(t *testing.T) {
 		httpClient.GetFunc = func(url string) (*http.Response, error) {
 			return nil, errors.New("HTTP error")
 		}
-		vape.Process(StatusCodeChecks{check})
+		vape.Process(SmokeTests{test})
 		select {
 		case <-resCh:
 			t.Error("expected to recieve on error chan, not result chan")
@@ -48,7 +48,7 @@ func TestProcess(t *testing.T) {
 				StatusCode: 200,
 			}, nil
 		}
-		vape.Process(StatusCodeChecks{check})
+		vape.Process(SmokeTests{test})
 		select {
 		case <-resCh:
 		case <-errCh:
@@ -57,7 +57,7 @@ func TestProcess(t *testing.T) {
 	})
 }
 
-func TestPerformCheck(t *testing.T) {
+func TestPerformTest(t *testing.T) {
 	baseURL, err := url.Parse("http://base.url")
 	if err != nil {
 		t.Fatal(err)
@@ -69,7 +69,7 @@ func TestPerformCheck(t *testing.T) {
 			return nil, errors.New("HTTP error")
 		}
 
-		_, err := vape.performCheck(check)
+		_, err := vape.performTest(test)
 		if err == nil {
 			t.Error("expected error: 'HTTP error', got: nil")
 		}
@@ -82,7 +82,7 @@ func TestPerformCheck(t *testing.T) {
 			}, nil
 		}
 
-		result, err := vape.performCheck(check)
+		result, err := vape.performTest(test)
 		if err != nil {
 			t.Errorf("expected error: nil, got: %v", err)
 		}
