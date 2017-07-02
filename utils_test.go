@@ -100,7 +100,6 @@ func TestFormatResult(t *testing.T) {
 			URI:                "/health",
 			ExpectedStatusCode: 200,
 		},
-		Pass:             true,
 		ActualStatusCode: 200,
 	}
 
@@ -117,7 +116,6 @@ func TestFormatResult(t *testing.T) {
 			URI:                "/health",
 			ExpectedStatusCode: 200,
 		},
-		Pass:             false,
 		ActualStatusCode: 500,
 	}
 

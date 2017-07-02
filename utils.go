@@ -39,10 +39,14 @@ func parseBaseURL(baseURL string) (*url.URL, error) {
 func formatResult(result SmokeTestResult) string {
 	message := fmt.Sprintf("[%d:%d] %s", result.Test.ExpectedStatusCode, result.ActualStatusCode, result.Test.URI)
 
+	if result.Test.Content != "" {
+		message = fmt.Sprintf("%s %s", message, result.Test.Content)
+	}
+
 	colour := 32
 	icon := '✓'
 
-	if !result.Pass {
+	if !result.Passed() {
 		icon = '✘'
 		colour = 31
 	}

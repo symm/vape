@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"testing"
@@ -88,6 +90,66 @@ func TestPerformTest(t *testing.T) {
 		}
 		if result.ActualStatusCode != 200 {
 			t.Errorf("expected status code: 200, got: %d", result.ActualStatusCode)
+		}
+	})
+
+	t.Run("TestHttpGetSuccessWithMatchingContent", func(t *testing.T) {
+		httpClient.GetFunc = func(url string) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(bytes.NewBufferString("Hello World")),
+			}, nil
+		}
+
+		var test = SmokeTest{
+			URI:                "test",
+			ExpectedStatusCode: 200,
+			Content:            "Hello World",
+		}
+
+		result, err := vape.performTest(test)
+		if err != nil {
+			t.Errorf("expected error: nil, got: %v", err)
+		}
+		if result.ActualStatusCode != 200 {
+			t.Errorf("expected status code: 200, got: %d", result.ActualStatusCode)
+		}
+		if string(result.ActualContent) != "Hello World" {
+			t.Errorf("expected content: Hello World, got: %s", result.ActualContent)
+		}
+		if result.Passed() != true {
+			t.Errorf("expected pass: true, got: %v", result.Passed())
+		}
+
+	})
+
+	t.Run("TestHttpGetSuccessWithNonMatchingContent", func(t *testing.T) {
+		httpClient.GetFunc = func(url string) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(bytes.NewBufferString("Not the message you are looking for")),
+			}, nil
+		}
+
+		var test = SmokeTest{
+			URI:                "test",
+			ExpectedStatusCode: 200,
+			Content:            "Hello World",
+		}
+
+		result, err := vape.performTest(test)
+		if err != nil {
+			t.Errorf("expected error: nil, got: %v", err)
+		}
+		if result.ActualStatusCode != 200 {
+			t.Errorf("expected status code: 200, got: %d", result.ActualStatusCode)
+		}
+		if string(result.ActualContent) != "Not the message you are looking for" {
+			t.Errorf("expected content: Not the message you are looking for, got: %s", result.ActualContent)
+		}
+
+		if result.Passed() != false {
+			t.Errorf("expected pass: false, got: %v", result.Passed())
 		}
 	})
 }

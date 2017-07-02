@@ -36,7 +36,6 @@ func main() {
 	for i := 0; i < testsLen; i++ {
 		select {
 		case res := <-resCh:
-
 			fmt.Println(formatResult(res))
 		case err := <-errCh:
 			fmt.Println(err)

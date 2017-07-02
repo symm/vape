@@ -1,21 +1,41 @@
 package main
 
 import (
+	"io/ioutil"
 	"net/url"
 	"path"
+	"strings"
 )
 
 // SmokeTest contains a URI and expected status code.
 type SmokeTest struct {
 	URI                string `json:"uri"`
 	ExpectedStatusCode int    `json:"expected_status_code"`
+	Content            string `json:"content"`
 }
 
 // SmokeTestResult is the result of a SmokeTest.
 type SmokeTestResult struct {
 	Test             SmokeTest
 	ActualStatusCode int
-	Pass             bool
+	ActualContent    []byte
+}
+
+// Passed determines if the SmokeTest passed successfully
+func (result SmokeTestResult) Passed() bool {
+	if result.Test.Content != "" {
+		return !result.contentMatched()
+	}
+
+	return result.statusCodeMatched()
+}
+
+func (result SmokeTestResult) statusCodeMatched() bool {
+	return (result.Test.ExpectedStatusCode == result.ActualStatusCode)
+}
+
+func (result SmokeTestResult) contentMatched() bool {
+	return (strings.Contains(string(result.ActualContent), result.Test.Content) == false)
 }
 
 // SmokeTests is a slice of smoke tests to perform.
@@ -66,9 +86,21 @@ func (v Vape) performTest(test SmokeTest) (SmokeTestResult, error) {
 		return SmokeTestResult{}, err
 	}
 
-	return SmokeTestResult{
+	result := SmokeTestResult{
 		ActualStatusCode: resp.StatusCode,
 		Test:             test,
-		Pass:             test.ExpectedStatusCode == resp.StatusCode,
-	}, nil
+	}
+
+	if test.Content != "" {
+		defer resp.Body.Close()
+		actualContent, err := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			return result, err
+		}
+
+		result.ActualContent = actualContent
+	}
+
+	return result, nil
 }

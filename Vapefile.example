@@ -1,7 +1,16 @@
 [
   {
+    "uri": "/status/418",
+    "expected_status_code": 418,
+    "content": "teapot"
+  },
+  {
     "uri": "/status/200",
     "expected_status_code": 200
+  },
+  {
+    "uri": "/status/304",
+    "expected_status_code": 304
   },
   {
     "uri": "/status/500",
