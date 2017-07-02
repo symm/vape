@@ -37,7 +37,7 @@ func main() {
 		select {
 		case res := <-resCh:
 			output := fmt.Sprintf("%s (expected: %d, actual: %d)", res.Test.URI, res.Test.ExpectedStatusCode, res.ActualStatusCode)
-			fmt.Println(parseOutput(output, res.Pass))
+			fmt.Println(parseOutput(output, res.Passed()))
 		case err := <-errCh:
 			fmt.Println(err)
 		}
