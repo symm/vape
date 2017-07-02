@@ -24,7 +24,7 @@ type SmokeTestResult struct {
 // Passed determines if the SmokeTest passed successfully
 func (result SmokeTestResult) Passed() bool {
 	if result.Test.Content != "" {
-		return result.contentMatched()
+		return !result.contentMatched()
 	}
 
 	return result.statusCodeMatched()
