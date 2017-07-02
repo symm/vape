@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"time"
 )
@@ -29,7 +28,8 @@ func main() {
 
 	smokeTests, err := parseVapefile(*vapeFile)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("Error reading config: %s", err.Error())
+		os.Exit(1)
 	}
 
 	testsLen := len(smokeTests)
@@ -53,10 +53,9 @@ func main() {
 	}
 
 	if passedCount < testsLen {
-		fmt.Println("\n🔥  Some tests failed. you may have a bad deployment")
+		fmt.Println("\n🔥  Some tests failed. You may have a bad deployment")
 		os.Exit(2)
 	}
 
 	fmt.Printf("\n✨  [%d/%d] tests passed in %s\n", passedCount, testsLen, time.Since(start))
-
 }
