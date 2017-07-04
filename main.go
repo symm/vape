@@ -8,6 +8,7 @@ import (
 )
 
 var vapeFile = flag.String("config", "Vapefile", "The full path to the Vape configuration file")
+var insecureSSL = flag.Bool("skip-ssl-verification", false, "")
 
 func main() {
 	start := time.Now()
@@ -34,7 +35,14 @@ func main() {
 
 	testsLen := len(smokeTests)
 	resCh, errCh := make(chan SmokeTestResult, testsLen), make(chan error, testsLen)
-	vape := NewVape(DefaultClient, baseURL, resCh, errCh)
+
+	client := DefaultClient
+
+	if *insecureSSL == true {
+		client = InsecureClient
+	}
+
+	vape := NewVape(client, baseURL, resCh, errCh)
 	vape.Process(smokeTests)
 
 	passedCount := 0

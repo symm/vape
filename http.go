@@ -11,15 +11,16 @@ type HTTPClient interface {
 	Get(url string) (*http.Response, error)
 }
 
-var defaultTransport = &http.Transport{
-	// TODO: allow this to be toggled
-	// So we can still smoke test sites with bad ssl cert
-	// e.g. ./vape https://self-signed.badssl.com/
-	TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-}
-
 // DefaultClient returns a HTTP client with configured timeouts.
 var DefaultClient = &http.Client{
-	Timeout:   time.Duration(5 * time.Second),
-	Transport: defaultTransport,
+	Timeout: time.Duration(5 * time.Second),
+}
+
+// InsecureClient returns a HTTP client which skips SSL verification
+var InsecureClient = &http.Client{
+	Timeout: time.Duration(5 * time.Second),
+	Transport: &http.Transport{
+
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	},
 }
