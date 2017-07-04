@@ -6,6 +6,11 @@
 
 Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written in Go. Inspired by [Shisha](https://github.com/namshi/shisha)
 
+![Success](/assets/success.png?raw=true "Success")
+![Failure](/assets/failure.png?raw=true "Failure")
+
+
+
 # How to use
 
 ## As a binary
