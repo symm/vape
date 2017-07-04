@@ -51,11 +51,11 @@ func TestReadVapefileSuccess(t *testing.T) {
 	json := `[
   {
     "uri": "/status/200",
-    "expected_status_code": 200
+    "status_code": 200
   },
   {
     "uri": "/status/500",
-    "expected_status_code": 500
+    "status_code": 500
   }
 ]`
 	tmpfile, cleanup, err := tmpFile(json)
@@ -73,7 +73,7 @@ func TestReadVapefileMissingFields(t *testing.T) {
 	t.Run("TestUriMissing", func(t *testing.T) {
 		json := `[
 	  {
-	    "expected_status_code": 200
+	    "status_code": 200
 	  }
 	]`
 		tmpfile, cleanup, err := tmpFile(json)
@@ -86,7 +86,7 @@ func TestReadVapefileMissingFields(t *testing.T) {
 			t.Errorf("expected error: got: %v", err)
 		}
 
-		expectedError := "Each test should have at least a uri and expected_status_code"
+		expectedError := "Each test should have at least a uri and status_code"
 		if strings.Contains(err.Error(), expectedError) == false {
 			t.Errorf("expected message: %s got %s", expectedError, err.Error())
 		}
@@ -109,7 +109,7 @@ func TestReadVapefileMissingFields(t *testing.T) {
 				t.Errorf("expected error: got: %v", err)
 			}
 
-			expectedError := "Each test should have at least a uri and expected_status_code"
+			expectedError := "Each test should have at least a uri and status_code"
 			if strings.Contains(err.Error(), expectedError) == false {
 				t.Errorf("expected message: %s got %s", expectedError, err.Error())
 			}
