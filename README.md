@@ -9,13 +9,13 @@ Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written
 ![Success](/assets/success.png?raw=true "Success")
 ![Failure](/assets/failure.png?raw=true "Failure")
 
-
-
 # How to use
 
 ## As a binary
 
-Create a `Vapefile` file in the format:
+Grab a binary from our [Releases page](https://github.com/symm/vape/releases) or build one by checking out this repo and running `make`
+
+Then create a `Vapefile` file in the format:
 ```json
 [
   {
@@ -42,7 +42,9 @@ then execute `vape http://your.domain` to run the tests
 
 ## As a container
 
-Create the `Vapefile` file as above but be sure to mount it inside the container:
+No need to download binaries or compile the project, we publish a ready made image on [Docker Hub](https://hub.docker.com/r/symm/vape/)
+
+Just create the `Vapefile` file as above and mount it inside a container:
 
 ```shell
 docker run \
