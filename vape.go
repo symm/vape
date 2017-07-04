@@ -10,7 +10,7 @@ import (
 // SmokeTest contains a URI and expected status code.
 type SmokeTest struct {
 	URI                string `json:"uri"`
-	ExpectedStatusCode int    `json:"expected_status_code"`
+	ExpectedStatusCode int    `json:"status_code"`
 	Content            string `json:"content"`
 }
 
