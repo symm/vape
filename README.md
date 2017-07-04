@@ -20,20 +20,20 @@ Then create a `Vapefile` file in the format:
 [
   {
     "uri": "/status/418",
-    "expected_status_code": 418,
+    "status_code": 418,
     "content": "teapot"
   },
   {
     "uri": "/status/200",
-    "expected_status_code": 200
+    "status_code": 200
   },
   {
     "uri": "/status/304",
-    "expected_status_code": 304
+    "status_code": 304
   },
   {
     "uri": "/status/500",
-    "expected_status_code": 500
+    "status_code": 500
   }
 ]
 ```
