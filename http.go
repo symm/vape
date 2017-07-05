@@ -16,12 +16,12 @@ func NewHTTPClient(sslSkip bool) *http.Client {
 	client := &http.Client{
 		Timeout: time.Duration(5 * time.Second),
 	}
-	if sslSkip {
-		client.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		}
+
+	client.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: sslSkip,
+		},
 	}
+
 	return client
 }
