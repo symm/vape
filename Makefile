@@ -18,7 +18,7 @@ run-docker:
 		https://httpbin.org
 
 test:
-	go test ./... -cover -coverprofile=coverage.out -race
+	go test ./... -cover -coverprofile=coverage.out
 
 coverage: test
 	go tool cover -html=coverage.out
