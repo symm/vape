@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-var vapeFile = flag.String("config", "Vapefile", "The full path to the Vape configuration file")
-
 func main() {
-	start := time.Now()
-
+	vapeFile := flag.String("config", "Vapefile", "The full path to the Vape configuration file")
+	insecureSSL := flag.Bool("skip-ssl-verification", false, "Ignore bad SSL certs")
 	flag.Parse()
+
+	start := time.Now()
 
 	args := flag.Args()
 	if len(args) < 1 {
@@ -34,28 +34,27 @@ func main() {
 
 	testsLen := len(smokeTests)
 	resCh, errCh := make(chan SmokeTestResult, testsLen), make(chan error, testsLen)
-	vape := NewVape(DefaultClient, baseURL, resCh, errCh)
+
+	httpClient := NewHTTPClient(*insecureSSL)
+	vape := NewVape(httpClient, baseURL, resCh, errCh)
 	vape.Process(smokeTests)
 
-	passedCount := 0
-
+	var passedCount int
 	for i := 0; i < testsLen; i++ {
 		select {
 		case res := <-resCh:
 			if res.Passed() {
 				passedCount++
 			}
-
 			fmt.Println(formatResult(res))
 		case err := <-errCh:
 			fmt.Println(err)
 		}
 	}
 
+	fmt.Printf("\n✨  [%d/%d] tests passed in %s\n", passedCount, testsLen, time.Since(start))
 	if passedCount < testsLen {
-		fmt.Println("\n🔥  Some tests failed. You may have a bad deployment")
+		fmt.Println("🔥  Some tests failed. You may have a bad deployment")
 		os.Exit(2)
 	}
-
-	fmt.Printf("\n✨  [%d/%d] tests passed in %s\n", passedCount, testsLen, time.Since(start))
 }

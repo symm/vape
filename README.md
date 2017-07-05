@@ -57,7 +57,8 @@ docker run \
 
 ### Optional Arguments
 
-`-config full/path/to/Vapefile` specify an alternative to looking for `Vapefile` in the current directory
+`-config full/path/to/Vapefile`: specify an alternative to looking for `Vapefile` in the current directory
+`-skip-ssl-verification`: Ignore bad / self signed SSL certificates
 
 ## TODO
 

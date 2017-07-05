@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"net/http"
 	"time"
 )
@@ -10,7 +11,17 @@ type HTTPClient interface {
 	Get(url string) (*http.Response, error)
 }
 
-// DefaultClient returns a HTTP client with configured timeouts.
-var DefaultClient = &http.Client{
-	Timeout: time.Duration(5 * time.Second),
+// NewHTTPClient returns a configrued HTTP client.
+func NewHTTPClient(sslSkip bool) *http.Client {
+	client := &http.Client{
+		Timeout: time.Duration(5 * time.Second),
+	}
+
+	client.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: sslSkip,
+		},
+	}
+
+	return client
 }
