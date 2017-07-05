@@ -23,7 +23,7 @@ func parseVapefile(file string) (SmokeTests, error) {
 
 	for _, test := range tests {
 		if test.URI == "" || test.ExpectedStatusCode == 0 {
-			return nil, fmt.Errorf("Each test should have at least a uri and expected_status_code:\n %v", string(raw))
+			return nil, fmt.Errorf("Each test should have at least a uri and status_code:\n %v", string(raw))
 		}
 
 	}
