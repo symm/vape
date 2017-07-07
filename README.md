@@ -1,6 +1,6 @@
 # Vape
 [![Build Status](https://img.shields.io/travis/symm/vape.svg)](https://travis-ci.org/symm/vape)
-[![Coverage Status](https://img.shields.io/coveralls/symm/vape.svg)](https://coveralls.io/github/symm/vape?branch=master)
+[![Codecov](https://img.shields.io/codecov/c/github/symm/vape.svg)](https://codecov.io/gh/symm/vape)
 [![Docker Pulls](https://img.shields.io/docker/pulls/symm/vape.svg)](https://hub.docker.com/r/symm/vape/)
 [![license](https://img.shields.io/github/license/symm/vape.svg)]()
 
