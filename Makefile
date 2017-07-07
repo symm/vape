@@ -33,7 +33,7 @@ run-docker:
 		https://httpbin.org
 
 test:
-	go test ./... -cover -coverprofile=coverage.out
+	go test ./... -cover -coverprofile=coverage.out -covermode=atomic
 
 coverage: test
 	go tool cover -html=coverage.out
