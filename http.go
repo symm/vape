@@ -12,16 +12,17 @@ type HTTPClient interface {
 }
 
 // NewHTTPClient returns a configrued HTTP client.
-func NewHTTPClient(sslSkip bool) *http.Client {
-	client := &http.Client{
-		Timeout: time.Duration(5 * time.Second),
+func NewHTTPClient(insecureSSL bool) *http.Client {
+	return &http.Client{
+		Timeout:   time.Duration(5 * time.Second),
+		Transport: newHTTPTransport(insecureSSL),
 	}
+}
 
-	client.Transport = &http.Transport{
+func newHTTPTransport(insecureSSL bool) *http.Transport {
+	return &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: sslSkip,
+			InsecureSkipVerify: insecureSSL,
 		},
 	}
-
-	return client
 }
