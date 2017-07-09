@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"sync"
 )
 
 // SmokeTest contains a URI and expected status code.
@@ -42,42 +43,85 @@ func (result SmokeTestResult) contentMatched() bool {
 	return (strings.Contains(string(result.ActualContent), result.Test.Content) == true)
 }
 
+// SmokeTestResults is a slice of smoke test results
+type SmokeTestResults []SmokeTestResult
+
+// PassedCount is the number of smoke tests that passed
+func (results SmokeTestResults) PassedCount() int {
+	var passedCount int
+	for _, result := range results {
+		if result.Passed() {
+			passedCount++
+		}
+	}
+	return passedCount
+}
+
 // SmokeTests is a slice of smoke tests to perform.
 type SmokeTests []SmokeTest
 
 // Vape contains dependencies used to run the application.
 type Vape struct {
-	client  HTTPClient
-	baseURL *url.URL
-	resCh   chan SmokeTestResult
-	errCh   chan error
+	client      HTTPClient
+	baseURL     *url.URL
+	concurrency int
 }
 
 // NewVape builds a Vape from the given dependencies.
-func NewVape(client HTTPClient, baseURL *url.URL, resCh chan SmokeTestResult, errCh chan error) Vape {
+func NewVape(client HTTPClient, baseURL *url.URL, concurrency int) Vape {
 	return Vape{
-		client:  client,
-		baseURL: baseURL,
-		resCh:   resCh,
-		errCh:   errCh,
+		client:      client,
+		baseURL:     baseURL,
+		concurrency: concurrency,
+	}
+}
+
+func (v Vape) worker(wg *sync.WaitGroup, tests <-chan SmokeTest, resultCh chan<- SmokeTestResult, errorCh chan<- error) {
+	for test := range tests {
+
+		result, err := v.performTest(test)
+
+		if err != nil {
+			errorCh <- err
+		} else {
+			resultCh <- result
+		}
+
+		wg.Done()
 	}
 }
 
 // Process takes a list of URIs and concurrently performs a smoke test on each.
-func (v Vape) Process(SmokeTests SmokeTests) {
-	// TODO: limit the numer of concurrent requests so we don't DoS the server
-	go func() {
-		for _, test := range SmokeTests {
-			go func(test SmokeTest) {
-				result, err := v.performTest(test)
-				if err != nil {
-					v.errCh <- err
-					return
-				}
-				v.resCh <- result
-			}(test)
+func (v Vape) Process(tests SmokeTests) (results SmokeTestResults, errors []error) {
+	testCount := len(tests)
+
+	jobCh := make(chan SmokeTest, testCount)
+	resultCh := make(chan SmokeTestResult, testCount)
+	errorCh := make(chan error, testCount)
+
+	var wg sync.WaitGroup
+	for w := 1; w <= v.concurrency; w++ {
+		go v.worker(&wg, jobCh, resultCh, errorCh)
+	}
+
+	for _, job := range tests {
+		jobCh <- job
+		wg.Add(1)
+	}
+	close(jobCh)
+
+	wg.Wait()
+
+	for i := 0; i < testCount; i++ {
+		select {
+		case err := <-errorCh:
+			errors = append(errors, err)
+		case result := <-resultCh:
+			results = append(results, result)
 		}
-	}()
+	}
+
+	return results, errors
 }
 
 // performTest tests the status code of a HTTP request of a given URI.
