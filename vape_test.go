@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"testing"
@@ -20,18 +21,31 @@ func (m mockHTTPClient) Get(url string) (*http.Response, error) {
 var httpClient = new(mockHTTPClient)
 
 var test = SmokeTest{
-	URI:                "test",
+	URI:                "/test",
 	ExpectedStatusCode: 200,
+}
+
+func getPassedStatusCodeResult() SmokeTestResult {
+	return SmokeTestResult{
+		Test: SmokeTest{
+			ExpectedStatusCode: 200,
+		},
+		ActualStatusCode: 200,
+	}
+}
+
+func getFailedStatusCodeResult() SmokeTestResult {
+	return SmokeTestResult{
+		Test: SmokeTest{
+			ExpectedStatusCode: 200,
+		},
+		ActualStatusCode: 404,
+	}
 }
 
 func TestSmokeTestResult(t *testing.T) {
 	t.Run("PassedWhenStatusCodeMatches", func(t *testing.T) {
-		result := SmokeTestResult{
-			Test: SmokeTest{
-				ExpectedStatusCode: 200,
-			},
-			ActualStatusCode: 200,
-		}
+		result := getPassedStatusCodeResult()
 
 		if result.Passed() != true {
 			t.Errorf("expected pass: true, got: %v", result.Passed())
@@ -39,12 +53,7 @@ func TestSmokeTestResult(t *testing.T) {
 	})
 
 	t.Run("FailedWhenStatusCodeDifferent", func(t *testing.T) {
-		result := SmokeTestResult{
-			Test: SmokeTest{
-				ExpectedStatusCode: 200,
-			},
-			ActualStatusCode: 404,
-		}
+		result := getFailedStatusCodeResult()
 
 		if result.Passed() != false {
 			t.Errorf("expected pass: false, got: %v", result.Passed())
@@ -97,12 +106,49 @@ func TestSmokeTestResult(t *testing.T) {
 	})
 }
 
-func TestPerformTest(t *testing.T) {
+func TestSmokeTestResults(t *testing.T) {
+	t.Run("TestPassedCount", func(t *testing.T) {
+		results := SmokeTestResults{
+			getPassedStatusCodeResult(),
+			getPassedStatusCodeResult(),
+		}
+
+		if results.PassedCount() != 2 {
+			t.Errorf("expected passed: 0, got: %d", results.PassedCount())
+		}
+
+		results = SmokeTestResults{
+			getPassedStatusCodeResult(),
+			getFailedStatusCodeResult(),
+			getFailedStatusCodeResult(),
+			getFailedStatusCodeResult(),
+		}
+
+		if results.PassedCount() != 1 {
+			t.Errorf("expected passed: 1, got: %d", results.PassedCount())
+		}
+
+		results = SmokeTestResults{
+			getFailedStatusCodeResult(),
+			getFailedStatusCodeResult(),
+		}
+
+		if results.PassedCount() != 0 {
+			t.Errorf("expected passed: 0, got: %d", results.PassedCount())
+		}
+	})
+}
+
+func getVapeClient() Vape {
 	baseURL, err := url.Parse("http://base.url")
 	if err != nil {
-		t.Fatal(err)
+		log.Fatal(err)
 	}
-	vape := NewVape(httpClient, baseURL, 3)
+	return NewVape(httpClient, baseURL, 3)
+}
+
+func TestPerformTest(t *testing.T) {
+	vape := getVapeClient()
 
 	t.Run("TestHTTPGetError", func(t *testing.T) {
 		httpClient.GetFunc = func(url string) (*http.Response, error) {
@@ -190,4 +236,47 @@ func TestPerformTest(t *testing.T) {
 			t.Errorf("expected pass: false, got: %v", result.Passed())
 		}
 	})
+}
+
+func TestWorker(t *testing.T) {
+	t.Run("TestProcessOkay", func(t *testing.T) {
+		vape := getVapeClient()
+
+		tests := SmokeTests{
+			test,
+			test,
+			test,
+		}
+		results, errors := vape.Process(tests)
+
+		if len(results) != 3 {
+			t.Errorf("expected result count: 3, got: %v", len(results))
+		}
+
+		if len(errors) != 0 {
+			t.Errorf("expected error count: 0, got: %v", len(errors))
+		}
+	})
+	t.Run("TestProcessErrors", func(t *testing.T) {
+		vape := getVapeClient()
+		httpClient.GetFunc = func(url string) (*http.Response, error) {
+			return nil, errors.New("HTTP error")
+		}
+
+		tests := SmokeTests{
+			test,
+			test,
+			test,
+		}
+		results, errors := vape.Process(tests)
+
+		if len(results) != 0 {
+			t.Errorf("expected result count: 0, got: %v", len(results))
+		}
+
+		if len(errors) != 3 {
+			t.Errorf("expected error count: 3, got: %v", len(errors))
+		}
+	})
+
 }

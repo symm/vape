@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/url"
 	"path"
@@ -93,7 +92,7 @@ func (v Vape) worker(wg *sync.WaitGroup, tests <-chan SmokeTest, resultCh chan<-
 }
 
 // Process takes a list of URIs and concurrently performs a smoke test on each.
-func (v Vape) Process(tests SmokeTests) (results SmokeTestResults) {
+func (v Vape) Process(tests SmokeTests) (results SmokeTestResults, errors []error) {
 	testCount := len(tests)
 
 	jobCh := make(chan SmokeTest, testCount)
@@ -116,13 +115,13 @@ func (v Vape) Process(tests SmokeTests) (results SmokeTestResults) {
 	for i := 0; i < testCount; i++ {
 		select {
 		case err := <-errorCh:
-			fmt.Println(err)
+			errors = append(errors, err)
 		case result := <-resultCh:
 			results = append(results, result)
 		}
 	}
 
-	return results
+	return results, errors
 }
 
 // performTest tests the status code of a HTTP request of a given URI.

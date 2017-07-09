@@ -38,10 +38,14 @@ func main() {
 	httpClient := NewHTTPClient(*insecureSSL)
 	vape := NewVape(httpClient, baseURL, *concurrency)
 
-	results := vape.Process(smokeTests)
+	results, errors := vape.Process(smokeTests)
 
 	for _, result := range results {
 		fmt.Println(formatResult(result))
+	}
+
+	for _, err := range errors {
+		fmt.Println(err)
 	}
 
 	fmt.Printf("\n✨  [%d/%d] tests passed in %s\n", results.PassedCount(), len(smokeTests), time.Since(start))
