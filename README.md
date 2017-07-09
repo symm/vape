@@ -4,18 +4,22 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/symm/vape.svg)](https://hub.docker.com/r/symm/vape/)
 [![license](https://img.shields.io/github/license/symm/vape.svg)]()
 
-Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written in Go. Inspired by [Shisha](https://github.com/namshi/shisha)
+Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written in Go.
+
+Vape is intended to be used within a [Continuous Delivery Pipeline](https://en.wikipedia.org/wiki/Continuous_delivery) as a
+post-deployment step.
+
+It can quickly make assertions about the status code and content of a list of URIs to determine if
+the release is good or not.
 
 ![Success](/assets/success.png?raw=true "Success")
 ![Failure](/assets/failure.png?raw=true "Failure")
 
 # How to use
 
-## As a binary
+## Configuration
 
-Grab a binary from our [Releases page](https://github.com/symm/vape/releases) or build one by checking out this repo and running `make`
-
-Then create a `Vapefile` file in the format:
+Create a file named `Vapefile` file in the format:
 ```json
 [
   {
@@ -38,15 +42,15 @@ Then create a `Vapefile` file in the format:
 ]
 ```
 
-then execute `vape http://your.domain` to run the tests
+The `uri` and `status_code` are required, `content` check is optional
 
-## As a container
+## Run vape from a container (Recommended)
 
-No need to download binaries or compile the project, we publish a ready made image on [Docker Hub](https://hub.docker.com/r/symm/vape/)
+We publish a ready made image on [Docker Hub](https://hub.docker.com/r/symm/vape/)
 
 Just create the `Vapefile` file as above and mount it inside a container:
 
-```shell
+```bash
 docker run \
     --rm \
     -t \
@@ -55,11 +59,32 @@ docker run \
     https://your.domain
 ```
 
-### Optional Arguments
+## Run vape from a binary
 
-`-config full/path/to/Vapefile`: specify an alternative to looking for `Vapefile` in the current directory
-`-skip-ssl-verification`: Ignore bad / self signed SSL certificates
+Grab a binary from our [releases page](https://github.com/symm/vape/releases) or build one by checking out this repo and running `make`
+then execute `./vape http://your.domain` to run the tests
 
-## TODO
+## Optional flags
 
-This project is HackDay™ quality. In need of test coverage and refactoring
+The following optional command line flags may be passed:
+
+```bash
+Usage of ./vape:
+  -concurrency int
+    	The maximum number of requests to make at a time (default 3)
+  -config string
+    	The full path to the Vape configuration file (default "Vapefile")
+  -skip-ssl-verification
+    	Ignore bad SSL certs
+```
+
+For example:
+
+```bash
+./vape -concurrency 10 -config vape.conf -skip-ssl-verification http://httpbin.org
+```
+
+# Links
+
+- [Shisha](https://github.com/namshi/shisha) - The tool which originally inspired the creation of this project
+- [Cigar](https://github.com/brunty/cigar) - PHP smoke testing tool.
