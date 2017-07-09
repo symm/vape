@@ -44,6 +44,20 @@ func (result SmokeTestResult) contentMatched() bool {
 	return (strings.Contains(string(result.ActualContent), result.Test.Content) == true)
 }
 
+// SmokeTestResults is a slice of smoke test results
+type SmokeTestResults []SmokeTestResult
+
+// PassedCount is the number of smoke tests that passed
+func (results SmokeTestResults) PassedCount() int {
+	var passedCount int
+	for _, result := range results {
+		if result.Passed() {
+			passedCount++
+		}
+	}
+	return passedCount
+}
+
 // SmokeTests is a slice of smoke tests to perform.
 type SmokeTests []SmokeTest
 
@@ -79,7 +93,7 @@ func (v Vape) worker(wg *sync.WaitGroup, tests <-chan SmokeTest, resultCh chan<-
 }
 
 // Process takes a list of URIs and concurrently performs a smoke test on each.
-func (v Vape) Process(tests SmokeTests) (results []SmokeTestResult) {
+func (v Vape) Process(tests SmokeTests) (results SmokeTestResults) {
 	testCount := len(tests)
 
 	jobCh := make(chan SmokeTest, testCount)

@@ -7,13 +7,15 @@ import (
 	"time"
 )
 
-func main() {
-	vapeFile := flag.String("config", "Vapefile", "The full path to the Vape configuration file")
-	insecureSSL := flag.Bool("skip-ssl-verification", false, "Ignore bad SSL certs")
-	concurrency := flag.Int("concurrency", 3, "The maximum number of requests to make at a time")
-	flag.Parse()
+var (
+	vapeFile    = flag.String("config", "Vapefile", "The full path to the Vape configuration file")
+	insecureSSL = flag.Bool("skip-ssl-verification", false, "Ignore bad SSL certs")
+	concurrency = flag.Int("concurrency", 3, "The maximum number of requests to make at a time")
+	start       = time.Now()
+)
 
-	start := time.Now()
+func main() {
+	flag.Parse()
 
 	args := flag.Args()
 	if len(args) < 1 {
@@ -35,21 +37,15 @@ func main() {
 
 	httpClient := NewHTTPClient(*insecureSSL)
 	vape := NewVape(httpClient, baseURL, *concurrency)
-	results := vape.Process(smokeTests)
 
-	passedCount := 0
+	results := vape.Process(smokeTests)
 
 	for _, result := range results {
 		fmt.Println(formatResult(result))
-		if result.Passed() {
-			passedCount++
-		}
 	}
 
-	testsLen := len(smokeTests)
-
-	fmt.Printf("\n✨  [%d/%d] tests passed in %s\n", passedCount, testsLen, time.Since(start))
-	if passedCount < testsLen {
+	fmt.Printf("\n✨  [%d/%d] tests passed in %s\n", results.PassedCount(), len(smokeTests), time.Since(start))
+	if results.PassedCount() < len(smokeTests) {
 		fmt.Println("🔥  Some tests failed. You may have a bad deployment")
 		os.Exit(2)
 	}
