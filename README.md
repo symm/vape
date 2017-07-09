@@ -4,7 +4,7 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/symm/vape.svg)](https://hub.docker.com/r/symm/vape/)
 [![license](https://img.shields.io/github/license/symm/vape.svg)]()
 
-Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written in Go. Inspired by [Shisha](https://github.com/namshi/shisha)
+Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written in Go.
 
 Vape is intended to be used within a [Continuous Delivery pipeline](https://en.wikipedia.org/wiki/Continuous_delivery)
 as a post-deployment step to quickly verify if a release is good or not.
@@ -13,6 +13,7 @@ It can quickly make assertions about the status code and content for a list of U
 
 ![Success](/assets/success.png?raw=true "Success")
 ![Failure](/assets/failure.png?raw=true "Failure")
+
 
 # How to use
 
@@ -83,3 +84,9 @@ For example:
 ```bash
 ./vape -concurrency 10 -config vape.conf -skip-ssl-verification http://httpbin.org
 ```
+
+# Links
+
+- [Shisha](https://github.com/namshi/shisha) - The tool which originally inspired the creation of this project
+
+- [Cigar](https://github.com/brunty/cigar) - Inspired by vape, [Matt Brunt](https://github.com/brunty) wrote a PHP smoke testing tool.
