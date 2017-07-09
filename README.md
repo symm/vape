@@ -6,18 +6,18 @@
 
 Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written in Go.
 
-Vape is intended to be used within a [Continuous Delivery pipeline](https://en.wikipedia.org/wiki/Continuous_delivery)
-as a post-deployment step to quickly verify if a release is good or not.
+Vape is intended to be used within a [Continuous Delivery Pipeline](https://en.wikipedia.org/wiki/Continuous_delivery) as a
+post-deployment step.
 
-It can quickly make assertions about the status code and content for a list of URIs on a given server.
+It can quickly make assertions about the status code and content of a list of URIs to determine if
+the release is good or not.
 
 ![Success](/assets/success.png?raw=true "Success")
 ![Failure](/assets/failure.png?raw=true "Failure")
 
-
 # How to use
 
-## Create a config file
+## Configuration
 
 Create a file named `Vapefile` file in the format:
 ```json
@@ -44,7 +44,7 @@ Create a file named `Vapefile` file in the format:
 
 The `uri` and `status_code` are required, `content` check is optional
 
-## Run the app from a container (Recommended)
+## Run vape from a container (Recommended)
 
 We publish a ready made image on [Docker Hub](https://hub.docker.com/r/symm/vape/)
 
@@ -59,11 +59,10 @@ docker run \
     https://your.domain
 ```
 
-## Run the app from a binary
+## Run vape from a binary
 
 Grab a binary from our [releases page](https://github.com/symm/vape/releases) or build one by checking out this repo and running `make`
 then execute `./vape http://your.domain` to run the tests
-
 
 ## Optional flags
 
@@ -88,5 +87,4 @@ For example:
 # Links
 
 - [Shisha](https://github.com/namshi/shisha) - The tool which originally inspired the creation of this project
-
-- [Cigar](https://github.com/brunty/cigar) - Inspired by vape, [Matt Brunt](https://github.com/brunty) wrote a PHP smoke testing tool.
+- [Cigar](https://github.com/brunty/cigar) - PHP smoke testing tool.
