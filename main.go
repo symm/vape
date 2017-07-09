@@ -10,6 +10,7 @@ import (
 func main() {
 	vapeFile := flag.String("config", "Vapefile", "The full path to the Vape configuration file")
 	insecureSSL := flag.Bool("skip-ssl-verification", false, "Ignore bad SSL certs")
+	concurrency := flag.Int("concurrency", 3, "The maximum number of requests to make at a time")
 	flag.Parse()
 
 	start := time.Now()
@@ -32,25 +33,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	testsLen := len(smokeTests)
-	resCh, errCh := make(chan SmokeTestResult, testsLen), make(chan error, testsLen)
-
 	httpClient := NewHTTPClient(*insecureSSL)
-	vape := NewVape(httpClient, baseURL, resCh, errCh)
-	vape.Process(smokeTests)
+	vape := NewVape(httpClient, baseURL, *concurrency)
+	results := vape.Process(smokeTests)
 
-	var passedCount int
-	for i := 0; i < testsLen; i++ {
-		select {
-		case res := <-resCh:
-			if res.Passed() {
-				passedCount++
-			}
-			fmt.Println(formatResult(res))
-		case err := <-errCh:
-			fmt.Println(err)
+	passedCount := 0
+
+	for _, result := range results {
+		fmt.Println(formatResult(result))
+		if result.Passed() {
+			passedCount++
 		}
 	}
+
+	testsLen := len(smokeTests)
 
 	fmt.Printf("\n✨  [%d/%d] tests passed in %s\n", passedCount, testsLen, time.Since(start))
 	if passedCount < testsLen {
