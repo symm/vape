@@ -6,6 +6,11 @@
 
 Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written in Go. Inspired by [Shisha](https://github.com/namshi/shisha)
 
+Vape is intended to be used within a [Continuous Delivery pipeline](https://en.wikipedia.org/wiki/Continuous_delivery)
+as a post-deployment step to quickly verify if a release is good or not.
+
+It can quickly make assertions about the status code and content for a list of URIs on a given server.
+
 ![Success](/assets/success.png?raw=true "Success")
 ![Failure](/assets/failure.png?raw=true "Failure")
 
@@ -36,15 +41,15 @@ Create a file named `Vapefile` file in the format:
 ]
 ```
 
-The URI and status code are required, content check is optional
+The `uri` and `status_code` are required, `content` check is optional
 
 ## Run the app from a container (Recommended)
 
-No need to download binaries or compile the project, we publish a ready made image on [Docker Hub](https://hub.docker.com/r/symm/vape/)
+We publish a ready made image on [Docker Hub](https://hub.docker.com/r/symm/vape/)
 
 Just create the `Vapefile` file as above and mount it inside a container:
 
-```shell
+```bash
 docker run \
     --rm \
     -t \
@@ -55,13 +60,15 @@ docker run \
 
 ## Run the app from a binary
 
-Grab a binary from our [Releases page](https://github.com/symm/vape/releases) or build one by checking out this repo and running `make`
-then execute `vape http://your.domain` to run the tests
+Grab a binary from our [releases page](https://github.com/symm/vape/releases) or build one by checking out this repo and running `make`
+then execute `./vape http://your.domain` to run the tests
 
 
 ## Optional flags
 
-```
+The following optional command line flags may be passed:
+
+```bash
 Usage of ./vape:
   -concurrency int
     	The maximum number of requests to make at a time (default 3)
@@ -69,4 +76,10 @@ Usage of ./vape:
     	The full path to the Vape configuration file (default "Vapefile")
   -skip-ssl-verification
     	Ignore bad SSL certs
+```
+
+For example:
+
+```bash
+./vape -concurrency 10 -config vape.conf -skip-ssl-verification http://httpbin.org
 ```
