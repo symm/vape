@@ -11,11 +11,9 @@ Modern [Smoke testing](https://en.wikipedia.org/wiki/Smoke_testing) tool written
 
 # How to use
 
-## As a binary
+## Create a config file
 
-Grab a binary from our [Releases page](https://github.com/symm/vape/releases) or build one by checking out this repo and running `make`
-
-Then create a `Vapefile` file in the format:
+Create a file named `Vapefile` file in the format:
 ```json
 [
   {
@@ -38,9 +36,9 @@ Then create a `Vapefile` file in the format:
 ]
 ```
 
-then execute `vape http://your.domain` to run the tests
+The URI and status code are required, content check is optional
 
-## As a container
+## Run the app from a container (Recommended)
 
 No need to download binaries or compile the project, we publish a ready made image on [Docker Hub](https://hub.docker.com/r/symm/vape/)
 
@@ -55,11 +53,20 @@ docker run \
     https://your.domain
 ```
 
-### Optional Arguments
+## Run the app from a binary
 
-`-config full/path/to/Vapefile`: specify an alternative to looking for `Vapefile` in the current directory
-`-skip-ssl-verification`: Ignore bad / self signed SSL certificates
+Grab a binary from our [Releases page](https://github.com/symm/vape/releases) or build one by checking out this repo and running `make`
+then execute `vape http://your.domain` to run the tests
 
-## TODO
 
-This project is HackDay™ quality. In need of test coverage and refactoring
+## Optional flags
+
+```
+Usage of ./vape:
+  -concurrency int
+    	The maximum number of requests to make at a time (default 3)
+  -config string
+    	The full path to the Vape configuration file (default "Vapefile")
+  -skip-ssl-verification
+    	Ignore bad SSL certs
+```
