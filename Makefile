@@ -1,6 +1,7 @@
 NAME = vape
 
 BUILD_NUMBER=$(shell git rev-parse --short HEAD)
+TAG=$(shell git describe --tags --exact-match|| echo "latest")
 
 build:
 	go build -o $(NAME)
@@ -19,7 +20,7 @@ release:
 	gpg --sign dist/vape-$(BUILD_NUMBER).tar.gz
 
 build-docker:
-	docker build -t symm/vape:latest .
+	docker build -t symm/vape:$(TAG) .
 
 config:
 	cp Vapefile.example Vapefile
