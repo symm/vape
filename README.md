@@ -1,5 +1,6 @@
 # Vape
 [![Build Status](https://img.shields.io/travis/symm/vape.svg)](https://travis-ci.org/symm/vape)
+[![Codacy grade](https://img.shields.io/codacy/grade/75560a57ec104dbbb3f5b4d95990b80f.svg)](https://www.codacy.com/app/symm/vape)
 [![Codecov](https://img.shields.io/codecov/c/github/symm/vape.svg)](https://codecov.io/gh/symm/vape)
 [![Docker Pulls](https://img.shields.io/docker/pulls/symm/vape.svg)](https://hub.docker.com/r/symm/vape/)
 [![license](https://img.shields.io/github/license/symm/vape.svg)]()
