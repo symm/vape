@@ -77,6 +77,8 @@ Usage of ./vape:
     	The full path to the Vape configuration file (default "Vapefile")
   -skip-ssl-verification
     	Ignore bad SSL certs
+  -authorization string
+      Authorization header containing authentication credentials (e.g., "Bearer 123")
 ```
 
 For example:

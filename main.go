@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	vapeFile    = flag.String("config", "Vapefile", "The full path to the Vape configuration file")
-	insecureSSL = flag.Bool("skip-ssl-verification", false, "Ignore bad SSL certs")
-	concurrency = flag.Int("concurrency", 3, "The maximum number of requests to make at a time")
-	start       = time.Now()
+	vapeFile      = flag.String("config", "Vapefile", "The full path to the Vape configuration file")
+	insecureSSL   = flag.Bool("skip-ssl-verification", false, "Ignore bad SSL certs")
+	concurrency   = flag.Int("concurrency", 3, "The maximum number of requests to make at a time")
+	authorization = flag.String("authorization", "", "Authorization header containing authentication credentials")
+	start         = time.Now()
 )
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 	}
 
 	httpClient := NewHTTPClient(*insecureSSL)
-	vape := NewVape(httpClient, baseURL, *concurrency)
+	vape := NewVape(httpClient, baseURL, *concurrency, *authorization)
 
 	results, errors := vape.Process(smokeTests)
 
