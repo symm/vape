@@ -11,11 +11,11 @@ import (
 )
 
 type mockHTTPClient struct {
-	GetFunc func(url string) (*http.Response, error)
+	DoFunc func(req *http.Request) (*http.Response, error)
 }
 
-func (m mockHTTPClient) Get(url string) (*http.Response, error) {
-	return m.GetFunc(url)
+func (m mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	return m.DoFunc(req)
 }
 
 var httpClient = new(mockHTTPClient)
@@ -144,14 +144,14 @@ func getVapeClient() Vape {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return NewVape(httpClient, baseURL, 3)
+	return NewVape(httpClient, baseURL, 3, "Bearer 123")
 }
 
 func TestPerformTest(t *testing.T) {
 	vape := getVapeClient()
 
 	t.Run("TestHTTPGetError", func(t *testing.T) {
-		httpClient.GetFunc = func(url string) (*http.Response, error) {
+		httpClient.DoFunc = func(req *http.Request) (*http.Response, error) {
 			return nil, errors.New("HTTP error")
 		}
 
@@ -162,7 +162,7 @@ func TestPerformTest(t *testing.T) {
 	})
 
 	t.Run("TestHTTPGetSuccess", func(t *testing.T) {
-		httpClient.GetFunc = func(url string) (*http.Response, error) {
+		httpClient.DoFunc = func(req *http.Request) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: 200,
 			}, nil
@@ -178,7 +178,7 @@ func TestPerformTest(t *testing.T) {
 	})
 
 	t.Run("TestHttpGetSuccessWithMatchingContent", func(t *testing.T) {
-		httpClient.GetFunc = func(url string) (*http.Response, error) {
+		httpClient.DoFunc = func(req *http.Request) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(bytes.NewBufferString("Hello World")),
@@ -208,7 +208,7 @@ func TestPerformTest(t *testing.T) {
 	})
 
 	t.Run("TestHttpGetSuccessWithNonMatchingContent", func(t *testing.T) {
-		httpClient.GetFunc = func(url string) (*http.Response, error) {
+		httpClient.DoFunc = func(req *http.Request) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(bytes.NewBufferString("Not the message you are looking for")),
@@ -259,7 +259,7 @@ func TestWorker(t *testing.T) {
 	})
 	t.Run("TestProcessErrors", func(t *testing.T) {
 		vape := getVapeClient()
-		httpClient.GetFunc = func(url string) (*http.Response, error) {
+		httpClient.DoFunc = func(req *http.Request) (*http.Response, error) {
 			return nil, errors.New("HTTP error")
 		}
 

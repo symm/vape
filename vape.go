@@ -6,6 +6,7 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"net/http"
 )
 
 // SmokeTest contains a URI and expected status code.
@@ -62,17 +63,19 @@ type SmokeTests []SmokeTest
 
 // Vape contains dependencies used to run the application.
 type Vape struct {
-	client      HTTPClient
-	baseURL     *url.URL
-	concurrency int
+	client        HTTPClient
+	baseURL       *url.URL
+	concurrency   int
+	authorization string
 }
 
 // NewVape builds a Vape from the given dependencies.
-func NewVape(client HTTPClient, baseURL *url.URL, concurrency int) Vape {
+func NewVape(client HTTPClient, baseURL *url.URL, concurrency int, authorization string) Vape {
 	return Vape{
 		client:      client,
 		baseURL:     baseURL,
 		concurrency: concurrency,
+		authorization: authorization,
 	}
 }
 
@@ -127,9 +130,21 @@ func (v Vape) Process(tests SmokeTests) (results SmokeTestResults, errors []erro
 // performTest tests the status code of a HTTP request of a given URI.
 func (v Vape) performTest(test SmokeTest) (SmokeTestResult, error) {
 	url := *v.baseURL
-	url.Path = path.Join(url.Path, test.URI)
+	u, err := url.Parse(path.Join(url.Path + test.URI))
+	if err != nil {
+		return SmokeTestResult{}, err
+	}
 
-	resp, err := v.client.Get(url.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return SmokeTestResult{}, err
+	}
+
+	if v.authorization != "" {
+		req.Header.Add("Authorization", v.authorization)
+	}
+
+	resp, err := v.client.Do(req)
 	if err != nil {
 		return SmokeTestResult{}, err
 	}

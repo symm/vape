@@ -8,7 +8,7 @@ import (
 
 // HTTPClient is a custom interface that wraps the basic Get method.
 type HTTPClient interface {
-	Get(url string) (*http.Response, error)
+	Do(req *http.Request) (*http.Response, error)
 }
 
 // NewHTTPClient returns a configrued HTTP client.
