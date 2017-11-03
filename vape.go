@@ -131,13 +131,11 @@ func (v Vape) Process(tests SmokeTests) (results SmokeTestResults, errors []erro
 func (v Vape) performTest(test SmokeTest) (SmokeTestResult, error) {
 	url := *v.baseURL
 	u, err := url.Parse(path.Join(url.Path + test.URI))
-
 	if err != nil {
 		return SmokeTestResult{}, err
 	}
 
 	req, err := http.NewRequest("GET", u.String(), nil)
-
 	if err != nil {
 		return SmokeTestResult{}, err
 	}
@@ -147,7 +145,6 @@ func (v Vape) performTest(test SmokeTest) (SmokeTestResult, error) {
 	}
 
 	resp, err := v.client.Do(req)
-
 	if err != nil {
 		return SmokeTestResult{}, err
 	}
