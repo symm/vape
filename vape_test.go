@@ -144,7 +144,7 @@ func getVapeClient() Vape {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return NewVape(httpClient, baseURL, 3, "")
+	return NewVape(httpClient, baseURL, 3, "Bearer 123")
 }
 
 func TestPerformTest(t *testing.T) {
